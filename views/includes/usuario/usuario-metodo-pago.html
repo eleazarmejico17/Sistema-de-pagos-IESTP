@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Método de Pago</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans">
+
+  <div class="flex">
+    <main class="flex-1 bg-white">
+
+      <section class="p-10">
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 max-w-5xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <div class="space-y-4">
+              <div class="border rounded-xl p-4 text-gray-700">Text</div>
+              <div class="border rounded-xl p-4 text-gray-700">Text</div>
+
+              <div class="border-t pt-4 text-sm">
+                <p class="flex justify-between"><span>Matrícula</span><span>S/ 180.00</span></p>
+                <p class="flex justify-between"><span>Descuento</span><span>S/ 00.00</span></p>
+                <p class="flex justify-between font-semibold border-t mt-2 pt-2"><span>Pagar</span><span>S/ 180.00</span></p>
+              </div>
+            </div>
+
+            <div class="border rounded-xl p-6">
+              <div class="flex justify-center gap-4 mb-6">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Yape_logo.png" alt="Yape" class="w-20 h-12 object-contain border rounded-md p-1">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="w-20 h-12 object-contain border rounded-md p-1">
+              </div>
+
+              <form class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1">Correo</label>
+                  <input type="email" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Contraseña</label>
+                  <input type="password" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
+                </div>
+                <button class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md w-full mt-4">Pagar: S/ 180.00</button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

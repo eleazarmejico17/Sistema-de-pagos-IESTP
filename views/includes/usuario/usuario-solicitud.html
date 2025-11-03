@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitud Registro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans">
+
+  <div class="flex">
+
+    <main class="flex-1 bg-white">
+      <section class="p-10">
+        <div class="bg-white rounded-xl shadow-md border border-gray-200 max-w-3xl mx-auto overflow-hidden">
+          <div class="bg-[#0b357b] text-white px-6 py-3 flex items-center rounded-t-xl">
+            <span class="mr-2">💬</span>
+            <h2 class="text-lg font-medium">Solicitud</h2>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div class="flex justify-between items-center">
+              <p class="font-semibold text-gray-700">73145710 MEJICO DE LA CRUZ Eleazar Natanael</p>
+              <div class="flex items-center space-x-2">
+                <input type="text" placeholder="Resolución" class="border rounded-lg px-3 py-1">
+                <button class="bg-gray-200 px-2 py-1 rounded-lg">🔍</button>
+              </div>
+            </div>
+
+            <div>
+              <textarea rows="3" placeholder="Redactar solicitud" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400"></textarea>
+            </div>
+
+            <div>
+              <span class="inline-block bg-green-400 text-white text-sm px-3 py-1 rounded-md">N°202662 Deportista D.</span>
+            </div>
+
+            <div>
+              <h3 class="text-gray-800 font-medium mb-2">Evidencias</h3>
+              <p class="text-gray-500 text-sm mb-3">En este espacio puedes agregar imágenes o documentos que respalden tu solicitud</p>
+              <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex items-center justify-center">
+                <div class="text-center">
+                  <span class="text-4xl text-gray-400">📎</span>
+                  <p class="text-gray-500 mt-2 text-sm">Agregar archivos</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button class="bg-blue-700 hover:bg-blue-800 text-white font-medium px-6 py-2 rounded-md">Enviar Solicitud</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

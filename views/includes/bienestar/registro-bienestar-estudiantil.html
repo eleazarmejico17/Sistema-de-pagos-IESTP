@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrar Beneficiario</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex min-h-screen bg-gray-100 font-sans">
+
+  <main class="flex-1  bg-cover bg-center relative">
+
+
+      <section class="grid p-8 grid-cols-1 md:grid-cols-2 gap-8">
+        
+
+        <div class="bg-white rounded-xl border border-blue-400 shadow-lg overflow-hidden">
+          <div class="bg-yellow-600 text-white font-semibold px-4 py-2 flex items-center space-x-2">
+            <span>👤</span>
+            <span>Beneficiario</span>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">DNI</label>
+              <div class="flex items-center gap-2">
+                <input type="text" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Ingrese DNI">
+                <button class="bg-gray-700 hover:bg-gray-900 text-white px-3 py-2 rounded-lg transition">🔍</button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Programa de Estudios</label>
+              <input type="text" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Nombre del programa">
+            </div>
+
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Ciclo</label>
+              <input type="text" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Ciclo actual">
+            </div>
+
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Categoría</label>
+              <select class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                <option value="">Seleccionar</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+              </select>
+            </div>
+
+            <button class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition font-semibold mt-3">
+              Agregar Beneficiario
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-300 shadow-lg overflow-hidden">
+          <div class="bg-yellow-600 text-white font-semibold px-4 py-2 flex items-center space-x-2">
+            <span>📘</span>
+            <span>Solicitud Resolución</span>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">N° Resolución</label>
+              <input type="text" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Ingrese número de resolución">
+            </div>
+
+            <div>
+              <label class="block text-gray-700 text-sm mb-1">Descripción</label>
+              <textarea rows="4" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Detalles o comentarios"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

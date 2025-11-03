@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REPORTES</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="flex min-h-screen bg-gray-100 font-sans">
+
+  <main class="flex-1">
+    
+
+    <section class="grid p-8 grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow-md">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </section>
+
+    <section class="bg-white p-8 rounded-xl shadow-md p-6">
+      <h2 class="text-lg font-semibold mb-4">Usuarios</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border px-4 py-2 text-left">Usuario</th>
+              <th class="border px-4 py-2 text-left">Password</th>
+              <th class="border px-4 py-2 text-left">Correo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="border px-4 py-2">admin</td>
+              <td class="border px-4 py-2">********</td>
+              <td class="border px-4 py-2">admin@correo.com</td>
+            </tr>
+            <tr>
+              <td class="border px-4 py-2">usuario1</td>
+              <td class="border px-4 py-2">********</td>
+              <td class="border px-4 py-2">usuario1@correo.com</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+
+  <script>
+  
+    new Chart(document.getElementById("barChart"), {
+      type: "bar",
+      data: {
+        labels: ["Ene", "Feb", "Mar", "Abr", "May"],
+        datasets: [{
+          label: "Usuarios nuevos",
+          data: [100, 180, 150, 220, 200],
+          backgroundColor: "#3B82F6"
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+
+    new Chart(document.getElementById("lineChart"), {
+      type: "line",
+      data: {
+        labels: ["Ene", "Feb", "Mar", "Abr", "May"],
+        datasets: [{
+          label: "Actividad",
+          data: [120, 200, 150, 230, 180],
+          borderColor: "#3B82F6",
+          backgroundColor: "#93C5FD50",
+          tension: 0.4
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+  </script>
+</body>
+</html>
+
