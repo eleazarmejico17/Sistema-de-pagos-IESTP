@@ -3,7 +3,8 @@ class Conexion {
     private $host = "localhost";
     private $usuario = "root";
     private $clave = "";
-    private $db = "db_pagos";
+    // Base de datos definida en el script SQL adjunto
+    private $db = "pago_descuentos";
     private $conexion;
 
     public function __construct() {
