@@ -1,67 +1,68 @@
-// Mock users database (will be replaced with real backend)
-const mockUsers = [
-    {
-        id: '1',
-        name: 'Usuario Demo',
-        email: 'demo@example.com',
-        password: 'demo123'
-    }
-];
-
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.className = `toast show ${type}`;
-    
     setTimeout(() => {
-        toast.className = 'toast';
+        toast.className = '';
+        toast.textContent = '';
     }, 3000);
 }
 
-function mockLogin(email, password) {
-    const user = mockUsers.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-        const { password, ...userWithoutPassword } = user;
-        return {
-            success: true,
-            token: 'mock-jwt-token-' + Date.now(),
-            user: userWithoutPassword
-        };
+async function checkConnection() {
+    try {
+        const res = await fetch('auth.php', { method: 'GET' });
+        const data = await res.json();
+        const statusEl = document.getElementById('db-status');
+        if (data.success) {
+            statusEl.textContent = 'Conexión: OK';
+            statusEl.className = 'text-green-300 text-center';
+        } else {
+            statusEl.textContent = 'Conexión: Fallida';
+            statusEl.className = 'text-red-300 text-center';
+        }
+    } catch (err) {
+        const statusEl = document.getElementById('db-status');
+        statusEl.textContent = 'Conexión: Error';
+        statusEl.className = 'text-red-300 text-center';
     }
-    
-    return {
-        success: false,
-        message: 'Email o contraseña incorrectos'
-    };
 }
 
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const loginBtn = document.getElementById('loginBtn');
-    
-    loginBtn.disabled = true;
-    loginBtn.textContent = 'Cargando...';
-    
-    setTimeout(() => {
-        const result = mockLogin(email, password);
-        
-        if (result.success) {
-            localStorage.setItem('token', result.token);
-            localStorage.setItem('user', JSON.stringify(result.user));
-            
-            showToast('¡Bienvenido! Has iniciado sesión correctamente', 'success');
-            
-            setTimeout(() => {
-                window.location.href = 'panel-admin.html';
-            }, 1000);
-        } else {
-            showToast(result.message, 'error');
+document.addEventListener('DOMContentLoaded', () => {
+    checkConnection();
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Cargando...';
+
+        try {
+            const res = await fetch('auth.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: email, contrasena: password })
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast('¡Bienvenido! Redirigiendo...', 'success');
+                setTimeout(() => {
+                    window.location.href = data.redirect || 'views/dashboard-usuario.php';
+                }, 800);
+            } else {
+                showToast(data.message || 'Credenciales incorrectas', 'error');
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Iniciar Sesión';
+            }
+        } catch (err) {
+            showToast('Error de red. Intente de nuevo.', 'error');
             loginBtn.disabled = false;
             loginBtn.textContent = 'Iniciar Sesión';
         }
-    }, 800);
+    });
 });

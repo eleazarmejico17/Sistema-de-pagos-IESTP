@@ -5,8 +5,8 @@ class ModelLogin {
 	private $db;
 
 	public function __construct() {
-		$conexion = new Conexion();
-		$this->db = $conexion->getConexion();
+		// Usar la clase Database (PDO) definida en config/conexion.php
+		$this->db = Database::getInstance()->getConnection();
 	}
 
 	/**
@@ -14,77 +14,80 @@ class ModelLogin {
 	 * Retorna un array con keys: success (bool), message (string), data (array|null), redirect (string|null)
 	 */
 	public function login(string $usuario, string $contrasena): array {
+		// Sanitizar entrada
+		$usuario = Database::sanitizeInput($usuario);
+		$contrasena = trim($contrasena);
+
 		// Buscar por usuario o correo
 		$sql = "SELECT u.id, u.usuario, u.nombre_completo, u.correo, u.contrasena_hash, r.nombre AS rol_nombre, r.id AS rol_id
 				FROM usuarios u
 				LEFT JOIN roles r ON u.rol_id = r.id
-				WHERE u.usuario = ? OR u.correo = ?
+				WHERE u.usuario = :usuario OR u.correo = :usuario
 				LIMIT 1";
 
-		if (!$stmt = $this->db->prepare($sql)) {
+		try {
+			$stmt = $this->db->prepare($sql);
+			$stmt->execute([':usuario' => $usuario]);
+			$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			if (!$row) {
+				return [
+					'success' => false,
+					'message' => 'Usuario o correo no encontrado',
+					'data' => null,
+					'redirect' => null
+				];
+			}
+
+			// Verificar la contraseña (se asume que en la BD está el hash con password_hash)
+			if (!password_verify($contrasena, $row['contrasena_hash'])) {
+				return [
+					'success' => false,
+					'message' => 'Contraseña incorrecta',
+					'data' => null,
+					'redirect' => null
+				];
+			}
+
+			// Preparar datos de sesión
+			$userData = [
+				'id' => $row['id'],
+				'usuario' => $row['usuario'],
+				'nombre_completo' => $row['nombre_completo'],
+				'correo' => $row['correo'],
+				'rol_id' => $row['rol_id'],
+				'rol_nombre' => $row['rol_nombre'] ?? 'usuario'
+			];
+
+			// Iniciar sesión
+			$this->iniciarSesion($userData);
+
+			// Decidir ruta de redirección según rol (nombres en minúscula)
+			$rol = strtolower($userData['rol_nombre']);
+			$redirect = 'views/dashboard-usuario.php';
+			if (strpos($rol, 'admin') !== false || $rol === 'superadmin') {
+				$redirect = 'views/dashboard-admin.php';
+			} elseif (strpos($rol, 'direccion') !== false) {
+				$redirect = 'views/dashboard-direccion.php';
+			} elseif (strpos($rol, 'bienestar') !== false) {
+				$redirect = 'views/dashboard-bienestar.php';
+			}
+
+			return [
+				'success' => true,
+				'message' => 'Autenticación correcta',
+				'data' => $userData,
+				'redirect' => $redirect
+			];
+		} catch (PDOException $e) {
+			error_log('Login query error: ' . $e->getMessage());
 			return [
 				'success' => false,
-				'message' => 'Error en la consulta de autenticación',
+				'message' => 'Error en el servidor al autenticar',
 				'data' => null,
 				'redirect' => null
 			];
 		}
-
-		$stmt->bind_param('ss', $usuario, $usuario);
-		$stmt->execute();
-		$result = $stmt->get_result();
-
-		if ($result->num_rows === 0) {
-			return [
-				'success' => false,
-				'message' => 'Usuario o correo no encontrado',
-				'data' => null,
-				'redirect' => null
-			];
-		}
-
-		$row = $result->fetch_assoc();
-
-		// Verificar la contraseña (se asume que en la BD está el hash con password_hash)
-		if (!password_verify($contrasena, $row['contrasena_hash'])) {
-			return [
-				'success' => false,
-				'message' => 'Contraseña incorrecta',
-				'data' => null,
-				'redirect' => null
-			];
-		}
-
-		// Preparar datos de sesión
-		$userData = [
-			'id' => $row['id'],
-			'usuario' => $row['usuario'],
-			'nombre_completo' => $row['nombre_completo'],
-			'correo' => $row['correo'],
-			'rol_id' => $row['rol_id'],
-			'rol_nombre' => $row['rol_nombre'] ?? 'usuario'
-		];
-
-		// Iniciar sesión
-		$this->iniciarSesion($userData);
-
-		// Decidir ruta de redirección según rol (nombres en minúscula)
-		$rol = strtolower($userData['rol_nombre']);
-		$redirect = 'views/dashboard-usuario.php';
-		if (strpos($rol, 'admin') !== false || $rol === 'superadmin') {
-			$redirect = 'views/dashboard-admin.php';
-		} elseif (strpos($rol, 'direccion') !== false) {
-			$redirect = 'views/dashboard-direccion.php';
-		} elseif (strpos($rol, 'bienestar') !== false) {
-			$redirect = 'views/dashboard-bienestar.php';
-		}
-
-		return [
-			'success' => true,
-			'message' => 'Autenticación correcta',
-			'data' => $userData,
-			'redirect' => $redirect
-		];
 	}
 
 	/**
