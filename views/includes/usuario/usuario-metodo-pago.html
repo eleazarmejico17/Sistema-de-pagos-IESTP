@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Método de Pago</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Método de Pago Profesional</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gray-100 font-sans">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
 
-  <div class="flex">
-    <main class="flex-1 bg-white">
+  <div class="w-full max-w-5xl p-6">
 
-      <section class="p-10">
-        <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6 max-w-5xl mx-auto">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
 
-            <div class="space-y-4">
-              <div class="border rounded-xl p-4 text-gray-700">Text</div>
-              <div class="border rounded-xl p-4 text-gray-700">Text</div>
+        <!-- Resumen de pago -->
+        <div class="space-y-6">
+          <h2 class="text-2xl font-bold text-gray-800 text-center md:text-left">Resumen de Pago</h2>
 
-              <div class="border-t pt-4 text-sm">
-                <p class="flex justify-between"><span>Matrícula</span><span>S/ 180.00</span></p>
-                <p class="flex justify-between"><span>Descuento</span><span>S/ 00.00</span></p>
-                <p class="flex justify-between font-semibold border-t mt-2 pt-2"><span>Pagar</span><span>S/ 180.00</span></p>
-              </div>
+          <div class="bg-gray-50 border rounded-2xl p-6 shadow-sm space-y-3">
+            <p class="flex justify-between text-gray-700"><span>Matrícula</span><span class="font-medium">S/ 180.00</span></p>
+            <p class="flex justify-between text-gray-700"><span>Descuento</span><span class="font-medium">S/ 0.00</span></p>
+            <p class="flex justify-between font-semibold text-gray-800 text-lg border-t pt-3"><span>Total a Pagar</span><span>S/ 180.00</span></p>
+          </div>
+
+          <div class="flex justify-center md:justify-start gap-4 mt-4">
+            <div class="border rounded-xl p-2 flex items-center justify-center hover:shadow-lg transition cursor-pointer">
+              <img src="assets/img/yape.png" alt="Yape" class="w-28 h-14 object-contain">
             </div>
-
-            <div class="border rounded-xl p-6">
-              <div class="flex justify-center gap-4 mb-6">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Yape_logo.png" alt="Yape" class="w-20 h-12 object-contain border rounded-md p-1">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="w-20 h-12 object-contain border rounded-md p-1">
-              </div>
-
-              <form class="space-y-4">
-                <div>
-                  <label class="block text-sm font-medium mb-1">Correo</label>
-                  <input type="email" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                </div>
-                <div>
-                  <label class="block text-sm font-medium mb-1">Contraseña</label>
-                  <input type="password" class="w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-400">
-                </div>
-                <button class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-md w-full mt-4">Pagar: S/ 180.00</button>
-              </form>
+            <div class="border rounded-xl p-2 flex items-center justify-center hover:shadow-lg transition cursor-pointer">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" class="w-28 h-14 object-contain">
             </div>
-
           </div>
         </div>
-      </section>
-    </main>
+
+        <!-- Formulario de pago -->
+        <div class="bg-gray-50 border rounded-3xl p-8 shadow-sm">
+          <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Datos de Pago</h2>
+
+          <form class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium mb-2">Correo electrónico</label>
+              <input type="email" placeholder="correo@ejemplo.com" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm transition">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Contraseña</label>
+              <input type="password" placeholder="••••••••" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm transition">
+            </div>
+            <button class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-xl w-full mt-4 transition shadow-md hover:shadow-lg">
+              Pagar: S/ 180.00
+            </button>
+          </form>
+
+          <p class="text-gray-500 text-sm text-center mt-6">
+            Al continuar, aceptas nuestros <a href="#" class="text-blue-600 underline">Términos y Condiciones</a> y <a href="#" class="text-blue-600 underline">Política de Privacidad</a>.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
   </div>
+
 </body>
 </html>

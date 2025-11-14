@@ -3,56 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Solicitud Registro</title>
+  <title>Nuevo Registro de Solicitud</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
 <body class="min-h-screen bg-gray-100 font-sans">
 
-  <div class="flex">
+  <main class="w-full max-w-5xl mx-auto p-6">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
 
-    <main class="flex-1 bg-white">
-      <section class="p-10">
-        <div class="bg-white rounded-xl shadow-md border border-gray-200 max-w-3xl mx-auto overflow-hidden">
-          <div class="bg-[#0b357b] text-white px-6 py-3 flex items-center rounded-t-xl">
-            <span class="mr-2">💬</span>
-            <h2 class="text-lg font-medium">Solicitud</h2>
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white px-6 py-4 flex items-center gap-3 rounded-t-2xl shadow-md">
+        <i class="fas fa-file-alt text-2xl"></i>
+        <h2 class="text-xl font-semibold tracking-wide">Nuevo Registro de Solicitud</h2>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-8 space-y-6">
+
+        <!-- Datos del usuario -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-gray-700 flex items-center gap-2">
+              <i class="fas fa-user text-blue-500"></i> Nombre completo
+            </label>
+            <input type="text" placeholder="Nombre del estudiante" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none transition">
           </div>
 
-          <div class="p-6 space-y-6">
-            <div class="flex justify-between items-center">
-              <p class="font-semibold text-gray-700">73145710 MEJICO DE LA CRUZ Eleazar Natanael</p>
-              <div class="flex items-center space-x-2">
-                <input type="text" placeholder="Resolución" class="border rounded-lg px-3 py-1">
-                <button class="bg-gray-200 px-2 py-1 rounded-lg">🔍</button>
-              </div>
-            </div>
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-gray-700 flex items-center gap-2">
+              <i class="fas fa-phone text-green-500"></i> Teléfono
+            </label>
+            <input type="tel" placeholder="999-999-999" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-green-400 focus:outline-none transition">
+          </div>
 
-            <div>
-              <textarea rows="3" placeholder="Redactar solicitud" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400"></textarea>
-            </div>
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-gray-700 flex items-center gap-2">
+              <i class="fas fa-list text-yellow-500"></i> Tipo de solicitud
+            </label>
+            <select class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+              <option>Seleccionar tipo</option>
+              <option>Deportista</option>
+              <option>Académica</option>
+              <option>Bienestar general</option>
+              <option>Otro</option>
+            </select>
+          </div>
 
-            <div>
-              <span class="inline-block bg-green-400 text-white text-sm px-3 py-1 rounded-md">N°202662 Deportista D.</span>
-            </div>
-
-            <div>
-              <h3 class="text-gray-800 font-medium mb-2">Evidencias</h3>
-              <p class="text-gray-500 text-sm mb-3">En este espacio puedes agregar imágenes o documentos que respalden tu solicitud</p>
-              <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex items-center justify-center">
-                <div class="text-center">
-                  <span class="text-4xl text-gray-400">📎</span>
-                  <p class="text-gray-500 mt-2 text-sm">Agregar archivos</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex justify-end">
-              <button class="bg-blue-700 hover:bg-blue-800 text-white font-medium px-6 py-2 rounded-md">Enviar Solicitud</button>
-            </div>
+          <div class="flex flex-col gap-2">
+            <label class="font-medium text-gray-700 flex items-center gap-2">
+              <i class="fas fa-calendar-alt text-red-500"></i> Fecha de solicitud
+            </label>
+            <input type="date" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-red-400 focus:outline-none transition">
           </div>
         </div>
-      </section>
-    </main>
-  </div>
+
+        <!-- Redactar solicitud -->
+        <div class="flex flex-col gap-2">
+          <label class="font-medium text-gray-700 flex items-center gap-2">
+            <i class="fas fa-comment-alt text-blue-500"></i> Descripción de la solicitud
+          </label>
+          <textarea rows="4" placeholder="Describe tu solicitud..." class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-400 focus:outline-none transition resize-none shadow-sm"></textarea>
+        </div>
+
+        <!-- Evidencias -->
+        <div class="flex flex-col gap-2">
+          <label class="font-medium text-gray-700 flex items-center gap-2">
+            <i class="fas fa-paperclip text-blue-500"></i> Evidencias
+          </label>
+          <p class="text-gray-500 text-sm mb-2">Agrega imágenes o documentos que respalden tu solicitud</p>
+          <input type="file" multiple class="border border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
+        </div>
+
+        <!-- Botón enviar -->
+        <div class="flex justify-start">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-md transition transform hover:-translate-y-1 hover:shadow-xl flex items-center gap-2">
+            <i class="fas fa-paper-plane"></i> Enviar Solicitud
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
 </body>
 </html>

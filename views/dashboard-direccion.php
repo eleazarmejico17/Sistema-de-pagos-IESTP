@@ -94,10 +94,18 @@ function activo($id, $pagina){
   <aside id="sidebar" class="fixed left-0 top-0 h-full w-72 bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-black text-white shadow-2xl z-50 rounded-tr-[70px] rounded-br-[70px] overflow-hidden backdrop-blur-lg transition-transform duration-700 ease-out translate-x-0">
     
     <!-- LOGO -->
-    <div class="flex flex-col items-center justify-center pt-10 pb-4 relative">
-      <img src="assets/img/logo1.png" alt="Logo" class="w-28 h-28 rounded-full shadow-lg hover:scale-110 transition-transform duration-700 animate-float">
-      <p class="text-sm text-gray-300 mt-2">Direccion</p>
-    </div>
+<div class="flex flex-col items-center justify-center pt-10 pb-4 relative">
+  <img src="assets/img/logo1.png" alt="Logo" 
+       class="w-28 h-28 rounded-full shadow-lg hover:scale-110 hover:rotate-6 transition-transform duration-700 ease-out animate-float">
+  <div class="mt-3 flex items-center gap-2">
+    <span class="relative flex h-3 w-3">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+    </span>
+    <p class="text-sm text-gray-300">Direccion</p>
+  </div>
+</div>
+
 
     <div class="mx-8 mb-6 h-[2px] bg-gradient-to-r from-transparent via-blue-400/40 to-transparent"></div>
 
