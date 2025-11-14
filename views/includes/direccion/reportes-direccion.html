@@ -6,79 +6,121 @@
   <title>REPORTES</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .hover-lift {
+      transition: all 0.3s ease;
+    }
+    .hover-lift:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
-<body class="flex min-h-screen bg-gray-100 font-sans">
+<body class="flex justify-center bg-gray-100 min-h-screen py-10 font-sans">
 
-  <main class="flex-1">
+  <main class="w-full max-w-6xl space-y-8">
 
-    <section class="grid p-8 grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white p-4 rounded-xl shadow-md">
-        <canvas id="barChart"></canvas>
+    <!-- GRAFICOS -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift">
+        <h2 class="text-lg font-semibold mb-4">Usuarios por Rol</h2>
+        <canvas id="doughnutChart"></canvas>
       </div>
-      <div class="bg-white p-4 rounded-xl shadow-md">
-        <canvas id="lineChart"></canvas>
+      <div class="bg-white p-6 rounded-2xl shadow-lg hover-lift">
+        <h2 class="text-lg font-semibold mb-4">Actividad Mensual</h2>
+        <canvas id="gradientLineChart"></canvas>
       </div>
     </section>
 
-
-    <section class="bg-white p-8 rounded-xl shadow-md p-6">
+    <!-- TABLA DE USUARIOS -->
+    <section class="bg-white p-6 rounded-2xl shadow-lg hover-lift">
       <h2 class="text-lg font-semibold mb-4">Usuarios</h2>
       <div class="overflow-x-auto">
         <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-100">
+          <thead class="bg-blue-50">
             <tr>
               <th class="border px-4 py-2 text-left">Usuario</th>
-              <th class="border px-4 py-2 text-left">Password</th>
+              <th class="border px-4 py-2 text-left">Rol</th>
               <th class="border px-4 py-2 text-left">Correo</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr class="hover:bg-blue-50 transition-colors">
               <td class="border px-4 py-2">admin</td>
-              <td class="border px-4 py-2">********</td>
+              <td class="border px-4 py-2">Administrador</td>
               <td class="border px-4 py-2">admin@correo.com</td>
             </tr>
-            <tr>
+            <tr class="hover:bg-blue-50 transition-colors">
               <td class="border px-4 py-2">usuario1</td>
-              <td class="border px-4 py-2">********</td>
+              <td class="border px-4 py-2">Estudiante</td>
               <td class="border px-4 py-2">usuario1@correo.com</td>
+            </tr>
+            <tr class="hover:bg-blue-50 transition-colors">
+              <td class="border px-4 py-2">usuario2</td>
+              <td class="border px-4 py-2">Profesor</td>
+              <td class="border px-4 py-2">usuario2@correo.com</td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
+
   </main>
 
   <script>
-  
-    new Chart(document.getElementById("barChart"), {
-      type: "bar",
+    // Doughnut chart
+    new Chart(document.getElementById("doughnutChart"), {
+      type: "doughnut",
       data: {
-        labels: ["Ene", "Feb", "Mar", "Abr", "May"],
+        labels: ["Administradores", "Estudiantes", "Profesores"],
         datasets: [{
-          label: "Usuarios nuevos",
-          data: [100, 180, 150, 220, 200],
-          backgroundColor: "#3B82F6"
+          data: [3, 12, 5],
+          backgroundColor: ["#3B82F6", "#10B981", "#F59E0B"],
+          borderWidth: 2,
+          borderColor: "#fff"
         }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } } }
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { padding: 15, boxWidth: 15 }
+          }
+        }
+      }
     });
 
-    new Chart(document.getElementById("lineChart"), {
+    // Gradient line chart
+    const ctx = document.getElementById("gradientLineChart").getContext("2d");
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+    new Chart(ctx, {
       type: "line",
       data: {
-        labels: ["Ene", "Feb", "Mar", "Abr", "May"],
+        labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"],
         datasets: [{
           label: "Actividad",
-          data: [120, 200, 150, 230, 180],
+          data: [120, 200, 150, 230, 180, 250, 210],
           borderColor: "#3B82F6",
-          backgroundColor: "#93C5FD50",
-          tension: 0.4
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: "#3B82F6",
+          pointRadius: 5
         }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } } }
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
     });
   </script>
+
 </body>
 </html>
-

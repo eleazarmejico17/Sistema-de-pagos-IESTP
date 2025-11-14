@@ -3,73 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DIRECCION DE RESOLUCIONES</title>
+  <title>DIRECCIÓN DE RESOLUCIONES</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .accordion-button {
+      transition: all 0.3s ease;
+    }
+    .accordion-content {
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+    }
+    .accordion-open {
+      max-height: 1000px;
+      opacity: 1;
+    }
+  </style>
 </head>
-<body class="flex bg-gray-100 min-h-screen">
+<body class="flex bg-gray-100 min-h-screen justify-center items-start py-10">
 
-    <section class="p-8 space-y-6">
+<section class="w-full max-w-5xl p-6 space-y-6">
 
-        <div class="grid p-8 grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="flex items-center gap-2">
-                <input type="text" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Ingrese DNI">
-                <button class="bg-gray-700 hover:bg-gray-900 text-white px-3 py-2 rounded-lg transition">🔍</button>
-            </div>
+  <!-- FILTROS DE BÚSQUEDA -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <input type="text" placeholder="Buscar por DNI" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+    <input type="text" placeholder="Buscar por Nombre" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+    <select class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+      <option value="">Carrera</option>
+      <option value="Ingeniería">Ingeniería</option>
+      <option value="Medicina">Medicina</option>
+      <option value="Arquitectura">Arquitectura</option>
+      <option value="Derecho">Derecho</option>
+    </select>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4">
+    <!-- GENERAR 10 RESOLUCIONES -->
+    <!-- Ejemplo: puedes clonar este bloque y cambiar contenido -->
+    <script>
+      const resoluciones = [
+        {nombre:'MEJICO DE LA CRUZ Eleazar Natanael', oficina:'Bienestar Estudiantil', estado:'rechazado', resolucion:'N°202602 Deportista D.'},
+        {nombre:'GARCÍA PÉREZ Juan Carlos', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202610 Becas D.'},
+        {nombre:'LOPEZ MARTINEZ Ana Sofia', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202615 Ayuda Económica'},
+        {nombre:'RAMIREZ TORRES Luis', oficina:'Bienestar Estudiantil', estado:'rechazado', resolucion:'N°202620 Subsidio D.'},
+        {nombre:'HERNANDEZ VARGAS Carla', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202625 Deportista A.'},
+        {nombre:'FERNANDEZ RUIZ Diego', oficina:'Bienestar Estudiantil', estado:'rechazado', resolucion:'N°202630 Transporte D.'},
+        {nombre:'SANCHEZ LOPEZ Maria', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202635 Beca Extraordinaria'},
+        {nombre:'TORO PEREZ Andres', oficina:'Bienestar Estudiantil', estado:'rechazado', resolucion:'N°202640 Subsidio A.'},
+        {nombre:'GOMEZ RIVERA Valeria', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202645 Deportista B.'},
+        {nombre:'MARTINEZ DIAZ Carlos', oficina:'Bienestar Estudiantil', estado:'aprobado', resolucion:'N°202650 Ayuda Económica'}
+      ];
+
+      resoluciones.forEach(r => {
+        document.write(`
+        <div class="border border-gray-200 rounded-2xl bg-white shadow-lg">
+          <button class="accordion-button w-full flex justify-between items-center p-5 font-semibold text-gray-800 bg-gradient-to-r from-blue-50 to-white hover:from-blue-100 hover:to-white rounded-t-2xl focus:outline-none">
+            <span>${r.nombre}</span>
+            <span class="text-blue-700 font-bold">▼</span>
+          </button>
+          <div class="accordion-content p-5 border-t border-gray-200 bg-white space-y-4">
+            <p class="font-semibold text-gray-700">${r.oficina}</p>
+            <p class="text-gray-600 text-sm">
+              Hola ${r.nombre}, tu solicitud ha sido ${r.estado}.
+            </p>
+
             <div>
-                <select class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
-                    <option value="">Categoría</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                </select>
-            </div>  
-        </div>      
-                
-      <div class="border border-blue-800 rounded-lg bg-white p-5 shadow-sm flex justify-between items-center">
-        <p class="font-semibold text-gray-800 text-sm">MEJICO DE LA CRUZ Eleazar Natanael</p>
-        <div class="flex items-center space-x-3">
-          <span class="bg-blue-900 text-white text-xs font-semibold px-3 py-1 rounded">N°202602 Pago de trámite exitoso</span>
-          <span class="text-black text-xl font-bold">▼</span>
-        </div>
-      </div>
-
-      <div class="border border-red-300 rounded-lg bg-white p-5 shadow-sm relative">
-        <div class="absolute right-4 top-3 text-black text-xl font-bold">▲</div>
-        <p class="font-semibold text-sm text-gray-800">OF. Bien estar estudiantil</p>
-        <p class="text-gray-700 mt-2 text-sm">
-          Hola Eleazar Natanael Mejico de la Cruz, desafortunadamente hemos desestimado su solicitud debido a que los motivos y evidencias presentadas son de años posteriores al correspondiente, por ende su solicitud fue rechazada.
-        </p>
-
-        <div class="mt-4">
-          <p class="font-semibold text-gray-700 text-sm">Resolución solicitada</p>
-          <span class="inline-block bg-green-300 text-green-900 text-xs font-semibold px-3 py-1 rounded mt-1">N°202602 Deportista D.</span>
-        </div>
-
-        <div class="mt-4">
-          <p class="font-semibold text-gray-700 text-sm mb-2">Evidencias</p>
-          <div class="flex space-x-3">
-            <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
-              <span class="text-gray-400 text-xl">🖼️</span>
+              <p class="font-semibold text-gray-700 text-sm mb-2">Resolución solicitada</p>
+              <span class="inline-block ${r.estado==='aprobado'?'bg-green-300 text-green-900':'bg-red-300 text-red-900'} text-xs font-semibold px-3 py-1 rounded">${r.resolucion}</span>
             </div>
-            <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
-              <span class="text-gray-400 text-xl">🖼️</span>
-            </div>
-            <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
-              <span class="text-gray-400 text-xl">🖼️</span>
+
+            <div>
+              <p class="font-semibold text-gray-700 text-sm mb-2">Evidencias</p>
+              <div class="flex space-x-3 mb-3">
+                <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
+                  <span class="text-gray-400 text-xl">🖼️</span>
+                </div>
+                <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
+                  <span class="text-gray-400 text-xl">🖼️</span>
+                </div>
+                <div class="bg-gray-100 w-24 h-16 flex items-center justify-center border rounded">
+                  <span class="text-gray-400 text-xl">🖼️</span>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <button class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-semibold">ACEPTAR</button>
+                <button class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold">RECHAZAR</button>
+              </div>
             </div>
           </div>
-
-            <button class=" w-24 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-semibold mt-3">
-              ACEPTAR
-            </button>
-            <button class="w-24 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold mt-3">
-              RECHAZAR
-            </button>          
         </div>
-      </div>
+        `);
+      });
+    </script>
+  </div>
 
-    </section>
-  </main>
+</section>
+
+<script>
+const accordions = document.querySelectorAll('.accordion-button');
+accordions.forEach(button => {
+  button.addEventListener('click', () => {
+    const content = button.nextElementSibling;
+    content.classList.toggle('accordion-open');
+
+    // Cambiar flecha
+    const arrow = button.querySelector('span:last-child');
+    arrow.textContent = content.classList.contains('accordion-open') ? '▲' : '▼';
+  });
+});
+</script>
 
 </body>
 </html>
