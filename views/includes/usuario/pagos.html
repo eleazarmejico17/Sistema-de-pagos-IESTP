@@ -4,62 +4,167 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagos - IESTP</title>
-  <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex bg-gray-100 min-h-screen">
 
+<body class="flex bg-gray-100 min-h-screen">
   <main class="flex-1 p-8">
-   
-    <div class="bg-white shadow rounded-xl p-6">
+    <div class="bg-white shadow rounded-xl p-6 overflow-x-auto">
       <table class="w-full border border-gray-200 text-sm">
         <thead>
           <tr class="bg-gray-100 text-left">
             <th class="border p-2 w-20">N°</th>
             <th class="border p-2">CONCEPTO</th>
             <th class="border p-2 w-32">UIT</th>
+            <th class="border p-2 w-32">Acción</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td class="border p-2">1.1</td>
-            <td class="border p-2">Carnet de medio Pasaje</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">1.2</td>
-            <td class="border p-2">Duplicado de Carnet</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">3.1</td>
-            <td class="border p-2 text-blue-600 underline">Inscripción del postulante modalidad ordinario</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">3.2</td>
-            <td class="border p-2 text-blue-600 underline">Inscripción del postulante modalidad exonerados</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">3.3</td>
-            <td class="border p-2 text-blue-600 underline">Inscripción del postulante modalidad por convenio de Transitabilidad</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">4.1</td>
-            <td class="border p-2">Trámite de Traslado Interno</td>
-            <td class="border p-2"></td>
-          </tr>
-          <tr>
-            <td class="border p-2">4.2</td>
-            <td class="border p-2">Trámite de Traslado de Turno</td>
-            <td class="border p-2"></td>
-          </tr>
+
+          <!-- --------------- SECCIÓN 1 --------------- -->
+          <tr><td class="border p-2">1.1</td><td class="border p-2">Carnet de Medio Pasaje</td><td class="border p-2">18.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Carnet%20de%20Medio%20Pasaje&uit=18.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">1.2</td><td class="border p-2">Duplicado de Carnet</td><td class="border p-2">18.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Duplicado%20de%20Carnet&uit=18.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 3 --------------- -->
+          <tr><td class="border p-2">3.1</td><td class="border p-2">Inscripción modalidad ordinario</td><td class="border p-2">205.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Inscripci%C3%B3n%20modalidad%20ordinario&uit=205.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">3.2</td><td class="border p-2">Inscripción modalidad exonerados</td><td class="border p-2">205.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Inscripci%C3%B3n%20modalidad%20exonerados&uit=205.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">3.3</td><td class="border p-2">Inscripción modalidad por convenio de Transitabilidad</td><td class="border p-2">205.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Inscripci%C3%B3n%20modalidad%20por%20convenio%20de%20Transitabilidad&uit=205.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 4 --------------- -->
+          <tr><td class="border p-2">4.1</td><td class="border p-2">Trámite de Traslado Interno</td><td class="border p-2">8.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Tr%C3%A1mite%20de%20Traslado%20Interno&uit=8.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">4.2</td><td class="border p-2">Trámite de Traslado de Turno</td><td class="border p-2">8.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Tr%C3%A1mite%20de%20Traslado%20de%20Turno&uit=8.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">4.3</td><td class="border p-2">Trámite de Traslado Externo</td><td class="border p-2">17.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Tr%C3%A1mite%20de%20Traslado%20Externo&uit=17.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 5 --------------- -->
+          <tr><td class="border p-2">5.1</td><td class="border p-2">Rectificación de matrícula</td><td class="border p-2">8.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Rectificaci%C3%B3n%20de%20matr%C3%ADcula&uit=8.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.2</td><td class="border p-2">Matrícula ingresantes por exoneración</td><td class="border p-2">170.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20ingresantes%20por%20exoneraci%C3%B3n&uit=170.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.3</td><td class="border p-2">Matrícula ingresante Turno</td><td class="border p-2">170.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20ingresante%20Turno&uit=170.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.4</td><td class="border p-2">Matrícula ingresante Traslado Externo</td><td class="border p-2">170.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20ingresante%20Traslado%20Externo&uit=170.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.5</td><td class="border p-2">Matrícula trasladado interno</td><td class="border p-2">170.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20trasladado%20interno&uit=170.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.6</td><td class="border p-2">Matrícula extraordinaria</td><td class="border p-2">23.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20extraordinaria&uit=23.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">5.7</td><td class="border p-2">Matrícula extemporánea</td><td class="border p-2">33.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20extempor%C3%A1nea&uit=33.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 7 --------------- -->
+          <tr><td class="border p-2">7.1</td><td class="border p-2">Reserva de matrícula</td><td class="border p-2">61.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Reserva%20de%20matr%C3%ADcula&uit=61.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">7.2</td><td class="border p-2">Convalidación interna por semestre</td><td class="border p-2">110.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Convalidaci%C3%B3n%20interna%20por%20semestre&uit=110.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">7.3</td><td class="border p-2">Convalidación externa por semestre</td><td class="border p-2">200.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Convalidaci%C3%B3n%20externa%20por%20semestre&uit=200.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">7.4</td><td class="border p-2">Trámite de Retiro de semestre</td><td class="border p-2">343.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Tr%C3%A1mite%20de%20Retiro%20de%20semestre&uit=343.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 8 y 9 --------------- -->
+          <tr><td class="border p-2">8.1</td><td class="border p-2">Trámite de Reingreso</td><td class="border p-2">82.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Tr%C3%A1mite%20de%20Reingreso&uit=82.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">9.2</td><td class="border p-2">Matrícula de Reingreso</td><td class="border p-2">282.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Matr%C3%ADcula%20de%20Reingreso&uit=282.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <!-- --------------- SECCIÓN 28 --------------- -->
+          <tr><td class="border p-2">28.1</td><td class="border p-2">Centro de Nivelación Académica - Ordinarios</td><td class="border p-2">38.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Centro%20de%20Nivelaci%C3%B3n%20Acad%C3%A9mica%20-%20Ordinarios&uit=38.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">28.2</td><td class="border p-2">Centro de Nivelación Académica - En partes</td><td class="border p-2">18.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Centro%20de%20Nivelaci%C3%B3n%20Acad%C3%A9mica%20-%20En%20partes&uit=18.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">28.3</td><td class="border p-2">Centro de Nivelación Académica - Convenios</td><td class="border p-2">156.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Centro%20de%20Nivelaci%C3%B3n%20Acad%C3%A9mica%20-%20Convenios&uit=156.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
+          <tr><td class="border p-2">28.4</td><td class="border p-2">Centro de Nivelación Académica (otra categoría)</td><td class="border p-2">156.00</td>
+          <td class="border p-2"><a href="/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html?concept=Centro%20de%20Nivelaci%C3%B3n%20Acad%C3%A9mica%20(otra%20categor%C3%ADa)&uit=156.00" class="bg-green-600 text-white px-3 py-1 rounded">Pagar</a></td></tr>
+
         </tbody>
       </table>
     </div>
   </main>
+  <script>
+    (function(){
+      // Encuentra todos los enlaces que apunten (o contengan) 'usuario-metodo-pago.html'
+      const links = Array.from(document.querySelectorAll('a')).filter(a => (a.getAttribute('href')||'').includes('usuario-metodo-pago.html'));
+      links.forEach(link => {
+        // Asegurar que el href apunte de forma absoluta a la ruta dentro del proyecto
+        try{
+          const absolutePath = window.location.origin + '/Sistema-de-pagos-IESTP/views/includes/usuario/usuario-metodo-pago.html';
+          link.setAttribute('href', absolutePath);
+        }catch(e){ /* ignore */ }
 
+        link.addEventListener('click', function(e){
+          e.preventDefault();
+          const tr = this.closest('tr');
+          if(!tr){
+            // Si no hay fila, redirige de forma normal
+            const fallback = resolveHref(this.getAttribute('href'));
+            window.location.assign(fallback);
+            return;
+          }
+          const cells = tr.querySelectorAll('td');
+          const concept = (cells[1] && cells[1].textContent.trim()) || '';
+          const uit = (cells[2] && cells[2].textContent.trim()) || '';
+          const params = new URLSearchParams({ concept: concept, uit: uit });
+
+          // Construir URL absoluta de destino de forma robusta
+          const base = resolveHref(this.getAttribute('href'));
+          const dest = base + (base.indexOf('?') === -1 ? '?' : '&') + params.toString();
+
+          // Depuración ligera (ver en consola del navegador)
+          console.log('Redirigiendo a:', dest);
+
+          // Intentar la redirección
+          try {
+            window.location.assign(dest);
+          } catch (err) {
+            console.error('Redirección fallida, abriendo en nueva pestaña:', err);
+            window.open(dest, '_self');
+          }
+        });
+      });
+
+      function resolveHref(href){
+        // Si ya es absoluta (empieza por / o http), devolverla tal cual
+        if(!href) return window.location.href;
+        if(/^https?:\/\//i.test(href) || href.charAt(0) === '/') return new URL(href, window.location.origin).toString();
+
+        // Si es relativo, resolverlo usando la ubicación actual
+        try{
+          return new URL(href, window.location.href).toString();
+        }catch(e){
+          // Fallback construyendo a partir del path actual
+          const path = window.location.pathname;
+          const basePath = path.substring(0, path.lastIndexOf('/') + 1);
+          return window.location.origin + basePath + href;
+        }
+      }
+    })();
+  </script>
 </body>
 </html>

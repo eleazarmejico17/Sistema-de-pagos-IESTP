@@ -18,10 +18,11 @@
           <h2 class="text-2xl font-bold text-gray-800 text-center md:text-left">Resumen de Pago</h2>
 
           <div class="bg-gray-50 border rounded-2xl p-6 shadow-sm space-y-3">
-            <p class="flex justify-between text-gray-700"><span>Matrícula</span><span class="font-medium">S/ 180.00</span></p>
-            <p class="flex justify-between text-gray-700"><span>Descuento</span><span class="font-medium">S/ 0.00</span></p>
-            <p class="flex justify-between font-semibold text-gray-800 text-lg border-t pt-3"><span>Total a Pagar</span><span>S/ 180.00</span></p>
-          </div>
+              <p class="flex justify-between text-gray-700"><span>Concepto</span><span id="concept-name" class="font-medium">—</span></p>
+              <p class="flex justify-between text-gray-700"><span>UIT</span><span id="uit-value" class="font-medium">0.00</span></p>
+              <p class="flex justify-between text-gray-700"><span>Descuento</span><span id="discount-value" class="font-medium">S/ 0.00</span></p>
+              <p class="flex justify-between font-semibold text-gray-800 text-lg border-t pt-3"><span>Total a Pagar</span><span id="total-amount">S/ 0.00</span></p>
+            </div>
 
           <div class="flex justify-center md:justify-start gap-4 mt-4">
             <div class="border rounded-xl p-2 flex items-center justify-center hover:shadow-lg transition cursor-pointer">
@@ -46,8 +47,8 @@
               <label class="block text-sm font-medium mb-2">Contraseña</label>
               <input type="password" placeholder="••••••••" class="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 focus:outline-none shadow-sm transition">
             </div>
-            <button class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-xl w-full mt-4 transition shadow-md hover:shadow-lg">
-              Pagar: S/ 180.00
+            <button id="pay-button" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-xl w-full mt-4 transition shadow-md hover:shadow-lg">
+              Pagar: <span id="pay-amount">S/ 0.00</span>
             </button>
           </form>
 
@@ -62,4 +63,31 @@
   </div>
 
 </body>
+<script>
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const concept = params.get('concept') || '';
+    const uit = params.get('uit') || '';
+    // Si existe un parámetro 'amount' úsalo, si no, por defecto usamos el valor de UIT
+    const amount = params.get('amount') || uit || '0.00';
+
+    const elConcept = document.getElementById('concept-name');
+    const elUit = document.getElementById('uit-value');
+    const elTotal = document.getElementById('total-amount');
+    const elPayAmount = document.getElementById('pay-amount');
+
+    if(elConcept) elConcept.textContent = concept || '—';
+    if(elUit) elUit.textContent = uit || '0.00';
+
+    // Formatea y muestra el monto (asumimos que el valor recibido ya está en formato numérico o con decimales)
+    const formatted = (value => {
+      // Asegurar que tenga dos decimales
+      const n = Number(String(value).replace(/[^0-9.-]+/g, '')) || 0;
+      return 'S/ ' + n.toFixed(2);
+    })(amount);
+
+    if(elTotal) elTotal.textContent = formatted;
+    if(elPayAmount) elPayAmount.textContent = formatted;
+  })();
+</script>
 </html>
