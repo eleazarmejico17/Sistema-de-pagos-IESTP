@@ -1,4 +1,7 @@
 <?php
+
+
+
 $pagina = $_GET['pagina'] ?? 'panel-admin';
 $baseRuta = "includes/admin/" . $pagina;
 

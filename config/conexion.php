@@ -6,8 +6,8 @@ class Database {
     // Constructor privado: evita instanciación directa
     private function __construct() {
         // Cargar variables de entorno (si existen)
-        $host = getenv('DB_HOST') ?: '127.0.0.1';
-        $dbname = getenv('DB_NAME') ?: 'pago_descuentos';
+        $host = getenv('DB_HOST') ?: 'localhost';
+        $dbname = getenv('DB_NAME') ?: 'db_sistema';
         $user = getenv('DB_USER') ?: 'root'; // cámbialo según tu entorno
         $pass = getenv('DB_PASS') ?: '';     // cámbialo según tu entorno
 
