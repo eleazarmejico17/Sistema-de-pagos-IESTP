@@ -124,30 +124,36 @@
     <div id="inicio-section" class="section-content">
       <!-- Module Cards -->
       <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Bienestar Card -->
-        <button type="button"
-          class="card-animate hover-lift bg-gradient-to-br from-lime-400 to-emerald-500 rounded-3xl p-8 text-white shadow-xl cursor-pointer relative overflow-hidden group w-full text-left">
-          
-          <!-- Efecto shimmer -->
-          <div class="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    
+        <form method="GET">
+          <input type="hidden" name="modulo" value="admin-bienestar">
 
-          <div class="relative z-10">
-            <div class="flex justify-between items-start mb-4">
-              <div>
-                <i class="fas fa-heart text-5xl mb-3 icon-bounce"></i>
-                <h3 class="text-2xl font-bold">BIENESTAR</h3>
+          <button type="submit"
+            class="card-animate hover-lift bg-gradient-to-br from-lime-400 to-emerald-500 rounded-3xl p-8 text-white shadow-xl cursor-pointer relative overflow-hidden group w-full text-left">
+            
+            <!-- Efecto shimmer -->
+            <div class="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div class="relative z-10">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <i class="fas fa-heart text-5xl mb-3 icon-bounce"></i>
+                  <h3 class="text-2xl font-bold">BIENESTAR</h3>
+                </div>
+              </div>
+
+              <p class="text-lime-100 mb-4">Gestión de bienestar estudiantil</p>
+
+              <div class="flex items-center gap-2 text-sm">
+                <i class="fas fa-users"></i>
+                <span>2 usuarios registrados</span>
               </div>
             </div>
 
-            <p class="text-lime-100 mb-4">Gestión de bienestar estudiantil</p>
+          </button>
+        </form>
+        
 
-            <div class="flex items-center gap-2 text-sm">
-              <i class="fas fa-users"></i>
-              <span>2 usuarios registrados</span>
-            </div>
-          </div>
-
-        </button>
 
 
         <button type="button"
