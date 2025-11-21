@@ -6,10 +6,10 @@ class Database {
     // Constructor privado: evita instanciación directa
     private function __construct() {
         // Cargar variables de entorno (si existen)
-        $host = getenv('DB_HOST') ?: 'localhost';
-        $dbname = getenv('DB_NAME') ?: 'db_sistema';
-        $user = getenv('DB_USER') ?: 'root'; // cámbialo según tu entorno
-        $pass = getenv('DB_PASS') ?: '';     // cámbialo según tu entorno
+        $host = getenv('DB_HOST') ?: '50.31.174.34';
+        $dbname = getenv('DB_NAME') ?: 'wxwdrnht_integrado_db';
+        $user = getenv('DB_USER') ?: 'wxwdrnht_wxwdrnht_integrado_db'; 
+        $pass = getenv('DB_PASS') ?: 'integrado_db2025';     
 
         $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
 
