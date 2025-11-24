@@ -8,29 +8,18 @@ class EstudiantesController {
         return $est->getAll();
     }
 
-    public function crear($post, $files) {
+    public function crear($post) {
         $est = new Estudiantes();
 
         // Imagen (opcional)
         $foto = null;
-        if (!empty($files['foto_est']['name']) && $files['foto_est']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = dirname(__DIR__) . '/uploads/estudiantes';
-
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0775, true);
-            }
-
-            $extension = strtolower(pathinfo($files['foto_est']['name'], PATHINFO_EXTENSION));
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-            if (in_array($extension, $allowedExtensions, true)) {
-                $nombre = uniqid('est_', true) . '.' . $extension;
-                $destino = $uploadDir . DIRECTORY_SEPARATOR . $nombre;
-
-                if (move_uploaded_file($files['foto_est']['tmp_name'], $destino)) {
-                    $foto = $nombre;
-                }
-            }
+        if (!empty($_FILES['foto_est']['name'])) {
+            $nombre = time() . "_" . $_FILES['foto_est']['name'];
+            move_uploaded_file(
+                $_FILES['foto_est']['tmp_name'],
+                __DIR__ . '/../uploads/' . $nombre
+            );
+            $foto = $nombre;
         }
 
         $post['foto_est'] = $foto;
