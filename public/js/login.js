@@ -1,5 +1,6 @@
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
+    if (!toast) return;
     toast.textContent = message;
     toast.className = `toast show ${type}`;
     setTimeout(() => {
@@ -8,11 +9,42 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
+// Credenciales quemadas por rol
+const usuarios = {
+    "admin@institutocajas.edu.pe": { password: "admin123", rol: "admin" },
+    "bienestar@institutocajas.edu.pe": { password: "bien123", rol: "bienestar" },
+    "direccion@institutocajas.edu.pe": { password: "dir123", rol: "direccion" },
+    "usuario@institutocajas.edu.pe": { password: "user123", rol: "usuario" }
+};
+
+// Simula login sin BD
+async function loginSimulado(email, password) {
+    const user = usuarios[email.trim().toLowerCase()];
+    if (!user) return { success: false, message: "Usuario no encontrado" };
+    if (user.password !== password) return { success: false, message: "Contraseña incorrecta" };
+    return { success: true, rol: user.rol };
+}
+
+// Redirige según rol
+function redirigirPorRol(rol) {
+    const rutas = {
+        admin: "../../views/dashboard-admin.php",
+        bienestar: "../../views/dashboard-bienestar.php",
+        direccion: "../../views/dashboard-direccion.php",
+        usuario: "../../views/dashboard-usuario.php"
+    };
+    return rutas[rol] || "views/dashboard-usuario.php";
+}
+
+// Simula conexión sin BD
 async function checkConnection() {
+    const statusEl = document.getElementById('db-status');
+    if (!statusEl) return;
+
     try {
-        const res = await fetch('auth.php', { method: 'GET' });
+        const res = await fetch('check-connection.php');
+        if (!res.ok) throw new Error("HTTP error");
         const data = await res.json();
-        const statusEl = document.getElementById('db-status');
         if (data.success) {
             statusEl.textContent = 'Conexión: OK';
             statusEl.className = 'text-green-300 text-center';
@@ -21,46 +53,50 @@ async function checkConnection() {
             statusEl.className = 'text-red-300 text-center';
         }
     } catch (err) {
-        const statusEl = document.getElementById('db-status');
         statusEl.textContent = 'Conexión: Error';
         statusEl.className = 'text-red-300 text-center';
     }
 }
 
+// Inicio
 document.addEventListener('DOMContentLoaded', () => {
     checkConnection();
 
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
+        const email = document.getElementById('email')?.value.trim();
+        const password = document.getElementById('password')?.value;
         const loginBtn = document.getElementById('loginBtn');
+
+        if (!email || !password || !loginBtn) return;
 
         loginBtn.disabled = true;
         loginBtn.textContent = 'Cargando...';
 
-        try {
-            const res = await fetch('auth.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ usuario: email, contrasena: password })
-            });
+        // 🔍 TRAZAS
+        console.log('📩 email:', email);
+        console.log('🔑 password:', password);
 
-            const data = await res.json();
+        const resultado = await loginSimulado(email, password);
+        console.log('📡 resultado:', resultado);
 
-            if (res.ok && data.success) {
-                showToast('¡Bienvenido! Redirigiendo...', 'success');
-                setTimeout(() => {
-                    window.location.href = data.redirect || 'views/dashboard-usuario.php';
-                }, 800);
-            } else {
-                showToast(data.message || 'Credenciales incorrectas', 'error');
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Iniciar Sesión';
-            }
-        } catch (err) {
-            showToast('Error de red. Intente de nuevo.', 'error');
+        if (resultado.success) {
+            showToast('¡Bienvenido! Redirigiendo...', 'success');
+
+            const rol = resultado.rol;
+            console.log('🧭 rol recibido:', rol);
+
+            const url = redirigirPorRol(rol);
+            console.log('🎯 URL a la que voy:', url);
+
+            // 🚀 REDIRIGIR INMEDIATAMENTE
+            window.location.href = url;
+        } else {
+            showToast(resultado.message || 'Credenciales incorrectas', 'error');
             loginBtn.disabled = false;
             loginBtn.textContent = 'Iniciar Sesión';
         }
