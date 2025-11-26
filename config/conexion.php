@@ -3,16 +3,22 @@ class Database {
     private static $instance = null;
     private $con;
 
+    // Datos de conexión (ajusta si cambias de servidor)
+    private const HOST = '50.31.174.34';
+    private const DB   = 'wxwdrnht_integrado_db';
+    private const USER = 'wxwdrnht_wxwdrnht_integrado_db';
+    private const PASS = 'integrado_db2025.';
+
     private function __construct() {
-        $dsn = "mysql:host=" . (getenv('DB_HOST') ?: '50.31.174.34') . ";dbname=" . (getenv('DB_NAME') ?: 'wxwdrnht_integrado_db') . ";charset=utf8mb4";
+        $dsn = "mysql:host=" . self::HOST . ";dbname=" . self::DB . ";charset=utf8mb4";
         try {
-            $this->con = new PDO($dsn, getenv('DB_USER') ?: 'wxwdrnht_wxwdrnht_integrado_db', getenv('DB_PASS') ?: 'integrado_db2025.');
+            $this->con = new PDO($dsn, self::USER, self::PASS);
             $this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->con->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->con->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         } catch (PDOException $e) {
-            error_log("Connection failed: " . $e->getMessage());
-            throw new Exception("Error de conexión a la base de datos. Por favor intente más tarde.");
+            // Muestra el error real (solo en desarrollo)
+            die("❌ Error de conexión: " . $e->getMessage());
         }
     }
 
@@ -38,7 +44,7 @@ class Database {
             return $stmt;
         } catch (PDOException $e) {
             error_log("Query error: " . $e->getMessage());
-            throw new Exception("Error al procesar la solicitud.");
+            die("❌ Error en consulta: " . $e->getMessage());
         }
     }
 }
