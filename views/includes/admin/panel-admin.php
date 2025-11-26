@@ -13,6 +13,9 @@ switch ($pagina) {
         $titulo = 'NOTIFICACIONES';
         $icono = 'fa-chart-bar';
         break;
+    default:
+        $titulo = 'INICIO';
+        $icono = 'fa-home';
 }
 
 // Función para botón activo
@@ -51,7 +54,6 @@ $archivos_validos = ['admin-usuarios', 'admin-bienestar', 'admin-direccion'];
 
 <main class="p-8">
   <header class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800"><i class="fas <?= $icono ?> mr-2"></i><?= $titulo ?></h1>
   </header>
 
   <!-- Tarjetas de módulos -->

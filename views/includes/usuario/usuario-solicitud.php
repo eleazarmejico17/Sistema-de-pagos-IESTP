@@ -1,3 +1,13 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['id_estudiante'])) {
+    die("Acceso denegado. Por favor inicia sesión.");
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -18,8 +28,9 @@
         <h2 class="text-xl font-semibold tracking-wide">Nuevo Registro de Solicitud</h2>
       </div>
 
-      <!-- Contenido -->
-      <div class="p-8 space-y-6">
+      <!-- Formulario -->
+      <form action="guardar-solicitud.php" method="POST" enctype="multipart/form-data" class="p-8 space-y-6">
+        <input type="hidden" name="estudiante_id" value="<?= $_SESSION['id_estudiante'] ?>">
 
         <!-- Datos del usuario -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -27,22 +38,22 @@
             <label class="font-medium text-gray-700 flex items-center gap-2">
               <i class="fas fa-user text-blue-500"></i> Nombre completo
             </label>
-            <input type="text" placeholder="Nombre del estudiante" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none transition">
+            <input type="text" name="nombre" placeholder="Nombre del estudiante" required class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-400 focus:outline-none transition">
           </div>
 
           <div class="flex flex-col gap-2">
             <label class="font-medium text-gray-700 flex items-center gap-2">
               <i class="fas fa-phone text-green-500"></i> Teléfono
             </label>
-            <input type="tel" placeholder="999-999-999" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-green-400 focus:outline-none transition">
+            <input type="tel" name="telefono" placeholder="999-999-999" required class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-green-400 focus:outline-none transition">
           </div>
 
           <div class="flex flex-col gap-2">
             <label class="font-medium text-gray-700 flex items-center gap-2">
               <i class="fas fa-list text-yellow-500"></i> Tipo de solicitud
             </label>
-            <select class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
-              <option>Seleccionar tipo</option>
+            <select name="tipo_solicitud" required class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-yellow-400 focus:outline-none transition">
+              <option value="">Seleccionar tipo</option>
               <option>Deportista</option>
               <option>Académica</option>
               <option>Bienestar general</option>
@@ -54,7 +65,7 @@
             <label class="font-medium text-gray-700 flex items-center gap-2">
               <i class="fas fa-calendar-alt text-red-500"></i> Fecha de solicitud
             </label>
-            <input type="date" class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-red-400 focus:outline-none transition">
+            <input type="date" name="fecha_solicitud" required class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-red-400 focus:outline-none transition">
           </div>
         </div>
 
@@ -63,7 +74,7 @@
           <label class="font-medium text-gray-700 flex items-center gap-2">
             <i class="fas fa-comment-alt text-blue-500"></i> Descripción de la solicitud
           </label>
-          <textarea rows="4" placeholder="Describe tu solicitud..." class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-400 focus:outline-none transition resize-none shadow-sm"></textarea>
+          <textarea name="descripcion" rows="4" placeholder="Describe tu solicitud..." required class="w-full border border-gray-300 rounded-xl p-4 focus:ring-2 focus:ring-blue-400 focus:outline-none transition resize-none shadow-sm"></textarea>
         </div>
 
         <!-- Evidencias -->
@@ -72,17 +83,16 @@
             <i class="fas fa-paperclip text-blue-500"></i> Evidencias
           </label>
           <p class="text-gray-500 text-sm mb-2">Agrega imágenes o documentos que respalden tu solicitud</p>
-          <input type="file" multiple class="border border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
+          <input type="file" name="foto" accept="image/*" class="border border-dashed border-gray-300 rounded-xl p-4 cursor-pointer hover:border-blue-400 transition">
         </div>
 
         <!-- Botón enviar -->
         <div class="flex justify-start">
-          <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-md transition transform hover:-translate-y-1 hover:shadow-xl flex items-center gap-2">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl shadow-md transition transform hover:-translate-y-1 hover:shadow-xl flex items-center gap-2">
             <i class="fas fa-paper-plane"></i> Enviar Solicitud
           </button>
         </div>
-
-      </div>
+      </form>
     </div>
   </main>
 
