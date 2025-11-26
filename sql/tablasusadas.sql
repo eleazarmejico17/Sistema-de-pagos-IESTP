@@ -1,4 +1,23 @@
-create table  estudiante(
+create table  ubdepartamento(
+		id int primary key not null auto_increment,
+		departamento varchar(250)
+	);
+
+	create table  ubprovincia(
+		id int primary key not null auto_increment,
+		provincia varchar(250),
+		ubdepartamento int,
+		foreign key (ubdepartamento) references ubdepartamento(id)
+	);
+
+	create table  ubdistrito(
+		id int primary key not null auto_increment,
+		distrito varchar(250),
+		ubprovincia int,
+		foreign key (ubprovincia) references ubprovincia(id)
+	);
+
+	create table  estudiante(
 		id int primary key not null auto_increment,
 		ubdistrito int,
 		dni_est char(8),
@@ -17,7 +36,15 @@ create table  estudiante(
 		estado int,
 		foreign key (ubdistrito) references ubdistrito(id)
 	);
-    create table  empleado(
+
+	create table  prog_estudios(
+		id int primary key not null auto_increment,
+		nom_progest varchar(40),
+		perfilingre_progest text,
+		perfilegre_progest text
+	);
+
+	create table  empleado(
 		id int primary key not null auto_increment,
 		prog_estudios int,
 		dni_emp char(8),
@@ -38,7 +65,27 @@ create table  estudiante(
 		estado int,
 		foreign key (prog_estudios) references prog_estudios(id)
 	);
-    create table  usuarios(
+
+	create table  matricula(
+		id int primary key not null auto_increment,
+		estudiante int,
+		prog_estudios int,
+		id_matricula char(9),
+		per_lectivo varchar(7),
+		per_acad varchar(3),
+		per_acad2 int(1),
+		seccion char(1),
+		turno char(1),
+		fec_matricula date,
+		cond_matricula char(1),
+		est_matricula char(1),
+		est_perlec char(1),
+		obs_matricula varchar(50),
+		foreign key (estudiante) references estudiante(id),
+		foreign key (prog_estudios) references prog_estudios(id)
+	);
+
+	create table  usuarios(
 		id int primary key not null auto_increment,
 		usuario varchar(200),
 		password text,
