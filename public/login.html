@@ -17,7 +17,6 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    /* Animaciones */
     @keyframes fadeSlide {
       0% { opacity: 0; transform: translateY(30px); }
       100% { opacity: 1; transform: translateY(0); }
@@ -27,7 +26,6 @@
       animation: fadeSlide 1s ease-out forwards;
     }
 
-    /* Fondo de imagen */
     .background-image {
       background-image: url('img/img-background.jpeg');
       background-size: cover;
@@ -35,7 +33,6 @@
       background-repeat: no-repeat;
     }
 
-    /* Canvas partículas */
     canvas#particles {
       position: absolute;
       inset: 0;
@@ -43,11 +40,20 @@
       pointer-events: none;
     }
 
-    /* Toast */
-    #toast { display: none; }
-    #toast.show { display: block; opacity: 1; transform: translateY(0); }
-    #toast.success { background-color: rgba(16,185,129,0.9); }
-    #toast.error { background-color: rgba(239,68,68,0.95); }
+    #toast {
+      display: none;
+    }
+    #toast.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #toast.success {
+      background-color: rgba(16,185,129,0.9);
+    }
+    #toast.error {
+      background-color: rgba(239,68,68,0.95);
+    }
   </style>
 </head>
 
@@ -59,21 +65,21 @@
   <!-- Capa oscura -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[2]"></div>
 
-  <!-- ==== Contenedor principal ==== -->
+  <!-- Contenedor principal -->
   <div class="relative z-10 w-full max-w-md px-8 py-10 bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 transform transition-all duration-500 fade-slide hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]">
 
-    <!-- ==== Logo ==== -->
+    <!-- Logo -->
     <div class="flex justify-center mb-6">
       <img src="img/logo1.png" alt="" class="w-24 h-24 object-contain drop-shadow-lg" />
     </div>
 
-    <!-- ==== Título ==== -->
+    <!-- Título -->
     <h1 class="text-3xl sm:text-4xl font-semibold text-white text-center mb-8 tracking-wide italic">
       Iniciar Sesión
     </h1>
 
-    <!-- ==== Formulario ==== -->
-    <form id="loginForm" action="login.php" method="POST" class="space-y-6 fade-slide" style="animation-delay: 0.3s;">
+    <!-- Formulario -->
+    <form id="loginForm" class="space-y-6 fade-slide" style="animation-delay: 0.3s;">
       
       <!-- Usuario -->
       <div>
@@ -107,14 +113,12 @@
       </button>
     </form>
 
-    <!-- Estado DB -->
-    <p id="db-status" class="mt-4 text-sm text-white text-center">Comprobando conexión...</p>
   </div>
 
-  <!-- ==== Toast ==== -->
+  <!-- Toast -->
   <div id="toast" class="fixed top-6 right-6 px-5 py-3 rounded-lg text-white font-medium shadow-lg opacity-0 transform -translate-y-4 transition-all duration-300 z-50"></div>
 
-  <!-- ==== Script Partículas Mejoradas ==== -->
+  <!-- Partículas -->
   <script>
     const canvas = document.getElementById("particles");
     const ctx = canvas.getContext("2d");
@@ -175,16 +179,8 @@
     animate();
   </script>
 
-  <!-- Mensaje si el login falló -->
-  <script>
-    // Si volvemos a login.html desde login.php (por error), mostramos toast
-    if (document.referrer.includes("login.php")) {
-      const toast = document.getElementById("toast");
-      toast.textContent = "Usuario o contraseña incorrectos";
-      toast.classList.add("show", "error");
-      setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-  </script>
+  <!-- Login logic -->
+  <script src="js/login.js"></script>
 
 </body>
 </html>
