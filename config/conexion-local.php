@@ -4,10 +4,10 @@ class Database {
     private $con = null;
 
     private function __construct() {
-        $dbHost = getenv('DB_HOST') ?: '50.31.174.34';
+        $dbHost = getenv('DB_HOST') ?: 'localhost';
         $dbName = getenv('DB_NAME') ?: 'wxwdrnht_integrado_db';
-        $dbUser = getenv('DB_USER') ?: 'wxwdrnht_wxwdrnht_integrado_db';
-        $dbPass = getenv('DB_PASS') ?: 'integrado_db2025.';
+        $dbUser = getenv('DB_USER') ?: 'root';
+        $dbPass = getenv('DB_PASS') ?: '';
 
         $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4";
 

@@ -73,14 +73,14 @@
     </h1>
 
     <!-- ==== Formulario ==== -->
-    <form id="loginForm" class="space-y-6 fade-slide" style="animation-delay: 0.3s;">
+    <form id="loginForm" action="login.php" method="POST" class="space-y-6 fade-slide" style="animation-delay: 0.3s;">
       
       <!-- Usuario -->
       <div>
-        <label for="email" class="block text-white text-center text-lg mb-2 font-light">Usuario</label>
+        <label for="usuario" class="block text-white text-center text-lg mb-2 font-light">Usuario</label>
         <div class="flex items-center bg-white/20 rounded-full px-4 py-3 backdrop-blur-sm focus-within:ring-2 focus-within:ring-white/40">
           <i class="fa-solid fa-user text-white/80 mr-3"></i>
-          <input type="email" id="email" placeholder="Email" required
+          <input type="text" id="usuario" name="usuario" placeholder="Usuario" required
             class="bg-transparent flex-1 text-white placeholder-white/70 focus:outline-none" />
         </div>
       </div>
@@ -90,7 +90,7 @@
         <label for="password" class="block text-white text-center text-lg mb-2 font-light">Contraseña</label>
         <div class="flex items-center bg-white/20 rounded-full px-4 py-3 backdrop-blur-sm focus-within:ring-2 focus-within:ring-white/40">
           <i class="fa-solid fa-lock text-white/80 mr-3"></i>
-          <input type="password" id="password" placeholder="••••••••" required
+          <input type="password" id="password" name="password" placeholder="••••••••" required
             class="bg-transparent flex-1 text-white placeholder-white/70 focus:outline-none" />
         </div>
       </div>
@@ -175,6 +175,16 @@
     animate();
   </script>
 
-  <script src="js/login.js"></script>
+  <!-- Mensaje si el login falló -->
+  <script>
+    // Si volvemos a login.html desde login.php (por error), mostramos toast
+    if (document.referrer.includes("login.php")) {
+      const toast = document.getElementById("toast");
+      toast.textContent = "Usuario o contraseña incorrectos";
+      toast.classList.add("show", "error");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+  </script>
+
 </body>
 </html>
