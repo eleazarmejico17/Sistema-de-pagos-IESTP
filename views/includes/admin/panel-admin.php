@@ -240,19 +240,6 @@
 </body>
 </html>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     <!-- Add/Edit Modal -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
       <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl scale-in">
