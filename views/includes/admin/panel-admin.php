@@ -1,7 +1,7 @@
 <?php
- // Ajusta la ruta a tu Database.php
-require_once 'C:/xampp/htdocs/Sistema-de-pagos-IESTP/config/conexion.php';;
-// Página actual
+
+require_once 'C:/xampp/htdocs/Sistema-de-pagos-IESTP/config/conexion-local.php';;
+
 $pagina = $_GET['pagina'] ?? 'panel-admin';
 
 switch ($pagina) {
@@ -18,13 +18,12 @@ switch ($pagina) {
         $icono = 'fa-home';
 }
 
-// Función para botón activo
+
 function activopanel($id, $pagina)
 {
     return $id === $pagina ? 'bg-gradient-to-r from-blue-600 to-blue-400 text-white' : 'text-white/80 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-400';
 }
 
-// Módulo dinámico
 $modulo = $_GET['modulo'] ?? null;
 $archivos_validos = ['admin-usuarios', 'admin-bienestar', 'admin-direccion'];
 ?>
@@ -56,37 +55,29 @@ $archivos_validos = ['admin-usuarios', 'admin-bienestar', 'admin-direccion'];
   <header class="mb-8">
   </header>
 
-  <!-- Tarjetas de módulos -->
+
   <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <form method="GET">
       <input type="hidden" name="modulo" value="admin-bienestar">
       <button type="submit" class="card-animate hover-lift bg-gradient-to-br from-lime-400 to-emerald-500 text-white p-6 rounded-2xl shadow-lg w-full text-left">
         <i class="fas fa-heart text-3xl mb-2"></i>
-        <h3 class="text-xl font-bold">BIENESTAR</h3>
-        <p class="text-sm opacity-90">Gestión de bienestar estudiantil</p>
+        <h3 class="text-xl font-bold">EMPLEADOS</h3>
+        <p class="text-sm opacity-90">Gestión de Empleados</p>
       </button>
     </form>
 
-    <form method="GET">
-      <input type="hidden" name="modulo" value="admin-direccion">
-      <button type="submit" class="card-animate hover-lift bg-gradient-to-br from-sky-400 to-blue-600 text-white p-6 rounded-2xl shadow-lg w-full text-left">
-        <i class="fas fa-building text-3xl mb-2"></i>
-        <h3 class="text-xl font-bold">DIRECCIÓN</h3>
-        <p class="text-sm opacity-90">Gestión de dirección académica</p>
-      </button>
-    </form>
 
     <form method="GET">
       <input type="hidden" name="modulo" value="admin-usuarios">
       <button type="submit" class="card-animate hover-lift bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 rounded-2xl shadow-lg w-full text-left">
         <i class="fas fa-users-cog text-3xl mb-2"></i>
-        <h3 class="text-xl font-bold">USUARIOS</h3>
-        <p class="text-sm opacity-90">Gestión general de usuarios</p>
+        <h3 class="text-xl font-bold">ESTUDIANTES</h3>
+        <p class="text-sm opacity-90">Gestión general de ESTUDIANTES</p>
       </button>
     </form>
   </section>
 
-  <!-- Contenido dinámico -->
+
   <div class="bg-white rounded-2xl shadow p-6">
     <?php
     if ($modulo && in_array($modulo, $archivos_validos)) {

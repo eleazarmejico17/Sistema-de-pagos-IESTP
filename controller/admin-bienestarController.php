@@ -9,12 +9,6 @@ class BienestarController {
     }
 
 
-    public function crear($post, $files) {
-        $emp = new Empleado();
-        return $emp->create($post, $files);
-    }
-
-
     public function eliminar($id) {
         $emp = new Empleado();
         return $emp->delete($id);

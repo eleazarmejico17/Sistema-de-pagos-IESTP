@@ -6,6 +6,6 @@ if (session_status() === PHP_SESSION_NONE) {
 session_unset();
 session_destroy();
 
-header("Location: login.html");
+header("Location: /Sistema-de-pagos-IESTP/index.html");
 exit();
 ?>
