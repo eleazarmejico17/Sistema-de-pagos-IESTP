@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Página actual
 $pagina = $_GET['pagina'] ?? 'usuario-solicitud';
-$ruta = "includes/usuario/$pagina.php";
+$ruta = "includes/usuario/$pagina.html";
 
 // Configuración central del menú con iconos FontAwesome
 $menu = [
