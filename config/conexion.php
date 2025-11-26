@@ -1,5 +1,5 @@
-<?php
-class Database {
+<!-- <?php
+/*class Database {
     private static $instance = null;
     private $con = null;
 
@@ -18,7 +18,7 @@ class Database {
             $this->con->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
         } catch (Throwable $e) {
             error_log("❌ Database Connection Error: " . $e->getMessage());
-            // No exponer el error real al usuario:
+            
             die("Error de conexión. Inténtelo más tarde.");
         }
     }
@@ -53,7 +53,7 @@ class Database {
         }
     }
 
-    /** Método útil para probar si la BD conecta correctamente */
+    
     public function testConnection() {
         try {
             $this->getConnection();
@@ -62,5 +62,5 @@ class Database {
             return false;
         }
     }
-}
-?>
+//}
+?> */

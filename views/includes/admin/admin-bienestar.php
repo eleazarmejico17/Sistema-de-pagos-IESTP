@@ -25,56 +25,6 @@ if ($status === 'created') {
 $errors = [];
 $previousData = [];
 
-// Crear empleado
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dni_emp'])) {
-    $input = filter_input_array(INPUT_POST, [
-        'dni_emp'        => FILTER_SANITIZE_NUMBER_INT,
-        'apnom_emp'      => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'sex_emp'        => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'cel_emp'        => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'mailp_emp'      => FILTER_SANITIZE_EMAIL,
-        'maili_emp'      => FILTER_SANITIZE_EMAIL,
-        'fecnac_emp'     => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'dir_emp'        => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'ubigeodir_emp'  => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'ubigeonac_emp'  => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'cargo_emp'      => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'estado'         => FILTER_SANITIZE_NUMBER_INT,
-        'cond_emp'       => FILTER_SANITIZE_FULL_SPECIAL_CHARS,
-        'id_progest'     => FILTER_SANITIZE_NUMBER_INT,
-        'fecinc_emp'     => FILTER_SANITIZE_FULL_SPECIAL_CHARS
-    ], true);
-
-    $previousData = array_map(static function ($value) {
-        return is_string($value) ? trim($value) : $value;
-    }, $input ?? []);
-
-    if (empty($previousData['dni_emp']) || strlen($previousData['dni_emp']) !== 8) {
-        $errors[] = 'El DNI debe tener exactamente 8 dígitos.';
-    }
-
-    if (empty($previousData['apnom_emp'])) {
-        $errors[] = 'Los apellidos y nombres son obligatorios.';
-    }
-
-    if (!empty($previousData['mailp_emp']) && !filter_var($previousData['mailp_emp'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'El correo personal no es válido.';
-    }
-
-    if (!empty($previousData['maili_emp']) && !filter_var($previousData['maili_emp'], FILTER_VALIDATE_EMAIL)) {
-        $errors[] = 'El correo institucional no es válido.';
-    }
-
-    if (empty($errors)) {
-        if ($ctrl->crear($previousData, $_FILES)) {
-            header("Location: {$redirectUrl}&status=created");
-            exit;
-        }
-
-        $errors[] = 'No se pudo registrar el empleado, intenta nuevamente.';
-    }
-}
-
 // Eliminar empleado
 if (isset($_GET['delete'])) {
     $deleteId = filter_input(INPUT_GET, 'delete', FILTER_SANITIZE_NUMBER_INT);
@@ -116,41 +66,7 @@ $oldValue = function (string $key) use ($previousData): string {
     </div>
 <?php endif; ?>
 
-<form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 shadow rounded-xl mt-6">
 
-    <input type="text" name="dni_emp" placeholder="DNI" required maxlength="8" value="<?= $oldValue('dni_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-    <input type="text" name="apnom_emp" placeholder="Apellidos y Nombres" required value="<?= $oldValue('apnom_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-
-    <select name="sex_emp" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-        <option value="M" <?= $oldValue('sex_emp') === 'M' ? 'selected' : '' ?>>Masculino</option>
-        <option value="F" <?= $oldValue('sex_emp') === 'F' ? 'selected' : '' ?>>Femenino</option>
-    </select>
-
-    <input type="text" name="cel_emp" placeholder="Celular" value="<?= $oldValue('cel_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-    <input type="email" name="mailp_emp" placeholder="Correo personal" value="<?= $oldValue('mailp_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-    <input type="email" name="maili_emp" placeholder="Correo institucional" value="<?= $oldValue('maili_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-
-    <input type="date" name="fecnac_emp" required value="<?= $oldValue('fecnac_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-    <input type="text" name="dir_emp" placeholder="Dirección" value="<?= $oldValue('dir_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-
-    <input type="text" name="ubigeodir_emp" placeholder="Ubigeo Dirección" value="<?= $oldValue('ubigeodir_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-    <input type="text" name="ubigeonac_emp" placeholder="Ubigeo Nacimiento" value="<?= $oldValue('ubigeonac_emp') ?>" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-
-    <input type="file" name="foto_emp" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-
-    <select name="cargo_emp" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-        <option value="A" <?= $oldValue('cargo_emp') === 'A' ? 'selected' : '' ?>>Administrativo</option>
-        <option value="D" <?= $oldValue('cargo_emp') === 'D' ? 'selected' : '' ?>>Docente</option>
-        <option value="B" <?= $oldValue('cargo_emp') === 'B' ? 'selected' : '' ?>>Bienestar</option>
-    </select>
-
-    <select name="estado" class="input border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400">
-        <option value="1" <?= $oldValue('estado') !== '0' ? 'selected' : '' ?>>Activo</option>
-        <option value="0" <?= $oldValue('estado') === '0' ? 'selected' : '' ?>>Inactivo</option>
-    </select>
-
-    <button class="bg-indigo-600 hover:bg-indigo-700 transition-colors text-white font-semibold p-3 rounded col-span-1 md:col-span-4">Registrar Empleado</button>
-</form>
 
 <!-- TABLA -->
 <table class="mt-6 w-full bg-white shadow rounded-xl">
