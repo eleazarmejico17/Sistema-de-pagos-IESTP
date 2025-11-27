@@ -96,6 +96,19 @@ function activo($id, $pagina){
         <i class="fas fa-chart-bar text-xl relative z-10"></i>
         <span class="relative z-10">NOTIFICACIONES</span>
       </button>
+      <button onclick="window.location='?pagina=admin-notificaciones'" class="relative flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold transition-all duration-500 hover:translate-x-2 overflow-hidden group <?= activo('reportes-bienestar-estudiantil', $pagina) ?>">
+        <span class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700"></span>
+        <span class="absolute inset-0 bg-white/5 group-hover:bg-white/10 rounded-2xl transition-all duration-700"></span>
+        <i class="fas fa-chart-bar text-xl relative z-10"></i>
+        <span class="relative z-10">AGREGAR USUARIO</span>
+      </button>
+      <button onclick="window.location='?pagina=admin-notificaciones'" class="relative flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold transition-all duration-500 hover:translate-x-2 overflow-hidden group <?= activo('reportes-bienestar-estudiantil', $pagina) ?>">
+        <span class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700"></span>
+        <span class="absolute inset-0 bg-white/5 group-hover:bg-white/10 rounded-2xl transition-all duration-700"></span>
+        <i class="fas fa-chart-bar text-xl relative z-10"></i>
+        <span class="relative z-10">AGREGAR PAGO</span>
+      </button>      
+      
     </nav>
 
     <div class="flex-1"></div>
