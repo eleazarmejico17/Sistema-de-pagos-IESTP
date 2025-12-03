@@ -1,57 +1,36 @@
 <?php
-class Database {
+class Conexion {
     private static $instance = null;
-    private $con;
+    private $pdo;
 
-    // Constructor privado: evita instanciación directa
+    private $host = "localhost";
+    private $user = "root";
+    private $pass = "";
+    private $db   = "db_sistema"; // ← cámbialo por tu base de datos
+
     private function __construct() {
-        // Cargar variables de entorno (si existen)
-        $host = getenv('DB_HOST') ?: 'localhost';
-        $dbname = getenv('DB_NAME') ?: 'db_sistema';
-        $user = getenv('DB_USER') ?: 'root'; // cámbialo según tu entorno
-        $pass = getenv('DB_PASS') ?: '';     // cámbialo según tu entorno
-
-        $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
-
         try {
-            $this->con = new PDO($dsn, $user, $pass);
-            $this->con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->con->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $this->con->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+            $this->pdo = new PDO(
+                "mysql:host={$this->host};dbname={$this->db};charset=utf8",
+                $this->user,
+                $this->pass
+            );
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            error_log("❌ Error de conexión: " . $e->getMessage());
-            throw new Exception("Error de conexión a la base de datos. Por favor, inténtelo más tarde.");
+            die("Error de conexión: " . $e->getMessage());
         }
     }
 
-    // Patrón Singleton: obtener única instancia
+    // Devuelve siempre la misma instancia compartida
     public static function getInstance() {
         if (self::$instance === null) {
-            self::$instance = new self();
+            self::$instance = new Conexion();
         }
         return self::$instance;
     }
 
-    // Obtener conexión PDO
+    // Retorna el objeto PDO
     public function getConnection() {
-        return $this->con;
-    }
-
-    // Sanitizar entrada de usuario
-    public static function sanitizeInput($data) {
-        return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
-    }
-
-    // Ejecutar consultas con parámetros preparados
-    public function executeQuery($sql, $params = []) {
-        try {
-            $stmt = $this->con->prepare($sql);
-            $stmt->execute($params);
-            return $stmt;
-        } catch (PDOException $e) {
-            error_log("❌ Error en la consulta: " . $e->getMessage());
-            throw new Exception("Error al procesar la solicitud en la base de datos.");
-        }
+        return $this->pdo;
     }
 }
-?>

@@ -1,40 +1,57 @@
 <?php
 require_once __DIR__ . '/../models/admin-tipo-pagoModel.php';
 
-class TipoPagoController
-{
-    private $model;
+class TipoPagoController {
 
-    public function __construct()
-    {
-        // modelo ya tiene conexión interna
-        $this->model = new TipoPagoModel();
+    public function listar() {
+        $tp = new TipoPago();
+        return $tp->getAll();
     }
 
-    public function crear()
-    {
-        if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-            include "views/includes/admin/admin-tipo-pago.php";
-            return;
-        }
+    public function crear($post) {
+        $tp = new TipoPago();
 
-        $nombre = trim($_POST["nombre"] ?? "");
-        $descripcion = trim($_POST["descripcion"] ?? "");
+        $data = [
+            'nombre'      => $post['nombre'],
+            'descripcion' => $post['descripcion']
+        ];
 
-        if ($nombre === "") {
-            $error = "El campo nombre es obligatorio.";
-            include "views/includes/admin/admin-tipo-pago.php";
-            return;
-        }
+        return $tp->create($data);
+    }
 
-        $ok = $this->model->insert($nombre, $descripcion);
+    public function eliminar($id) {
+        $tp = new TipoPago();
+        return $tp->delete($id);
+    }
+}
 
-        if ($ok) {
-            $msg = "Tipo de pago registrado correctamente.";
-        } else {
-            $error = "No se pudo guardar el tipo de pago.";
-        }
 
-        include "views/includes/admin/admin-tipo-pago.php";
+// ======== DESPACHADOR (igual que tus otros módulos) ==========
+if (isset($_GET['accion'])) {
+
+    $controller = new TipoPagoController();
+
+    switch ($_GET['accion']) {
+
+        case 'crear':
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $ok = $controller->crear($_POST);
+
+                header("Location: ../views/includes/admin/admin-tipo-pago.php?msg=" . ($ok ? "ok" : "error"));
+                exit();
+            }
+            break;
+
+        case 'eliminar':
+            if (isset($_GET['id'])) {
+                $controller->eliminar($_GET['id']);
+                header("Location: ../views/includes/admin/admin-tipo-pago.php?msg=deleted");
+                exit();
+            }
+            break;
+
+        default:
+            echo "Acción no válida";
+            break;
     }
 }
