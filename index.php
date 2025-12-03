@@ -1,3 +1,8 @@
+<?php
+http_response_code(404);
+include('404.html');
+exit;
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -43,7 +48,7 @@
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
       <div class="flex items-center gap-4">
-        <img src="public/img/logo.png" alt="Logo IESTP" class="w-16 h-16 rounded-md object-cover shadow-sm">
+        <img src="public/img/logo1.png" alt="Logo IESTP" class="w-16 h-16 rounded-md object-cover shadow-sm">
         <div>
           <h1 class="text-xl md:text-2xl font-extrabold text-[#002B77] uppercase">
             IESTP Andrés Avelino Cáceres

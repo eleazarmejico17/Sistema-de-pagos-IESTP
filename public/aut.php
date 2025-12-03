@@ -10,7 +10,7 @@ if (!isset($_SESSION['usuario']) || !isset($_SESSION['rol'])) {
 }
 
 if (!in_array($_SESSION['rol'], $rolesPermitidos, true)) {
-    header('Location: ../public/403.php');      // página de “No autorizado”
+    header('Location: ../errors/403.html');      // página de “No autorizado”
     exit;
 }
 /* Si llegamos aquí, el usuario está autenticado y autorizado */
