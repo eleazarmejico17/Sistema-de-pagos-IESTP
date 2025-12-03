@@ -705,6 +705,7 @@ create table pagos(
 
 
 
+
 /*     SISTEMA DE CAPACITACIÓN           */
 
 
