@@ -1,12 +1,12 @@
 <?php
-require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../config/conexion-local.php';
 
 class Empleado {
     private $db;
     private $uploadDir;
 
     public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
+        $this->db = Conexion::getInstance()->getConnection();
         $this->uploadDir = dirname(__DIR__) . '/uploads/empleados';
     }
 

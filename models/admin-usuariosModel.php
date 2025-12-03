@@ -1,11 +1,11 @@
 <?php
-require_once __DIR__ . '/../config/conexion.php';
+require_once __DIR__ . '/../config/conexion-local.php';
 
 class Estudiantes {
     private $db;
 
     public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
+        $this->db = Conexion::getInstance()->getConnection();
     }
 
     // Obtener todos los estudiantes

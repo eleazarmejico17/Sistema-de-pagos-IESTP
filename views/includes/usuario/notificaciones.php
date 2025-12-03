@@ -1,10 +1,8 @@
 <?php
-// views/includes/usuario/notificaciones.php
 require_once __DIR__ . "/../../../config/conexion.php";
 
 $db = Database::getInstance()->getConnection();
 
-// Obtener notificaciones (solicitudes con respuesta)
 $sql = "SELECT * FROM solicitudes 
         WHERE estado IN ('Aprobado', 'Rechazado') 
         AND notificacion_enviada = TRUE
@@ -12,9 +10,6 @@ $sql = "SELECT * FROM solicitudes
 $stmt = $db->prepare($sql);
 $stmt->execute();
 $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Obtener la ruta base para las imágenes (AGREGAR ESTA LÍNEA)
-$base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/Sistema-de-pagos-IESTP-main';
 ?>
 
 <main class="flex-1 p-8">
@@ -53,24 +48,28 @@ $base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/Sistema-de-pagos-IESTP-main';
             </span>
           </div>
 
-          <?php if ($notif['archivos']): ?>
+            <?php if ($notif['archivos']): ?>
             <div class="mt-5">
               <p class="font-semibold text-gray-700 text-sm mb-2">Evidencias</p>
               <div class="flex space-x-3">
                 <?php 
                 $archivos = explode(",", $notif['archivos']);
                 foreach($archivos as $archivo): 
+                  $archivo = trim($archivo);
+                  if ($archivo === '') continue;
                   $extension = strtolower(pathinfo($archivo, PATHINFO_EXTENSION));
+                  $ruta = "../uploads/solicitudes/" . rawurlencode($archivo);
+                  $archivoSeguro = htmlspecialchars($archivo, ENT_QUOTES, 'UTF-8');
                   if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])): 
                 ?>
                   <div class="bg-gray-100 w-24 h-20 flex items-center justify-center border rounded-xl hover:shadow-md transition cursor-pointer overflow-hidden"
-                       onclick="abrirImagen('<?= $base_url ?>/uploads/solicitudes/<?= htmlspecialchars($archivo) ?>')">
-                    <img src="<?= $base_url ?>/uploads/solicitudes/<?= htmlspecialchars($archivo) ?>" 
+                       onclick="abrirImagen('<?= $ruta ?>')">
+                    <img src="<?= $ruta ?>" alt="<?= $archivoSeguro ?>"
                          class="object-cover w-full h-full">
                   </div>
                 <?php else: ?>
                   <div class="bg-gray-100 w-24 h-20 flex items-center justify-center border rounded-xl hover:shadow-md transition cursor-pointer">
-                    <span class="text-gray-400 text-2xl">📄</span>
+                    <span class="text-gray-400 text-xs text-center px-1 break-words"><?= $archivoSeguro ?></span>
                   </div>
                 <?php endif; endforeach; ?>
               </div>

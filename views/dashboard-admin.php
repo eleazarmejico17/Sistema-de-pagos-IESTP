@@ -11,6 +11,14 @@ switch($pagina){
         $titulo = 'NOTIFICACIONES';
         $icono = 'fa-chart-bar';
         break;
+    case 'admin-agregar-usuario':
+        $titulo = 'USUARIOS';
+        $icono = 'fa-chart-bar';
+        break;
+        case 'admin-tipo-pago':
+        $titulo = 'TIPO DE PAGOS';
+        $icono = 'fa-chart-bar';
+        break;
     default:
         $titulo = 'INICIO';
         $icono = 'fa-home';
@@ -75,7 +83,7 @@ function activo($id, $pagina){
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
         </span>
-        <p class="text-sm text-gray-300">...</p>
+        <p class="text-sm text-gray-300">Administrador</p>
       </div>
     </div>
 
@@ -96,6 +104,19 @@ function activo($id, $pagina){
         <i class="fas fa-chart-bar text-xl relative z-10"></i>
         <span class="relative z-10">NOTIFICACIONES</span>
       </button>
+      <button onclick="window.location='?pagina=admin-agregar-usuario'" class="relative flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold transition-all duration-500 hover:translate-x-2 overflow-hidden group <?= activo('reportes-bienestar-estudiantil', $pagina) ?>">
+        <span class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700"></span>
+        <span class="absolute inset-0 bg-white/5 group-hover:bg-white/10 rounded-2xl transition-all duration-700"></span>
+        <i class="fas fa-chart-bar text-xl relative z-10"></i>
+        <span class="relative z-10">AGREGAR USUARIO</span>
+      </button>
+      <button onclick="window.location='?pagina=admin-tipo-pago'" class="relative flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold transition-all duration-500 hover:translate-x-2 overflow-hidden group <?= activo('reportes-bienestar-estudiantil', $pagina) ?>">
+        <span class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-700"></span>
+        <span class="absolute inset-0 bg-white/5 group-hover:bg-white/10 rounded-2xl transition-all duration-700"></span>
+        <i class="fas fa-chart-bar text-xl relative z-10"></i>
+        <span class="relative z-10">AGREGAR PAGO</span>
+      </button>      
+      
     </nav>
 
     <div class="flex-1"></div>

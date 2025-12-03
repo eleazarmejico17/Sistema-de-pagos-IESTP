@@ -1,7 +1,6 @@
 <?php
 // Página actual
 $pagina = $_GET['pagina'] ?? 'usuario-solicitud';
-$ruta = "includes/usuario/$pagina.html";
 
 // Configuración central del menú con iconos FontAwesome
 $menu = [
@@ -11,6 +10,13 @@ $menu = [
   'pagos'               => ['icon' => 'fa-file-invoice', 'texto' => 'PAGOS'],
   'comprobantes'        => ['icon' => 'fa-folder', 'texto' => 'COMPROBANTES']
 ];
+
+// CORREGIDO → priorizar PHP, luego HTML
+if (file_exists("includes/usuario/{$pagina}.php")) {
+    $ruta = "includes/usuario/{$pagina}.php";
+} else {
+    $ruta = "includes/usuario/{$pagina}.html";
+}
 
 // Título e icono de la página actual
 $titulo = $menu[$pagina]['texto'] ?? 'INICIO';
@@ -131,7 +137,11 @@ document.getElementById('toggleSidebar').addEventListener('click', () => {
       if(file_exists($ruta)){
         include $ruta;
       } else {
-        echo "<p class='text-red-600 font-semibold text-center'>Página no encontrada</p>";
+        echo "<div class='bg-red-50 border border-red-200 rounded-lg p-6 text-center'>
+                <i class='fas fa-exclamation-triangle text-red-500 text-4xl mb-3'></i>
+                <p class='text-red-700 font-bold'>Página no encontrada</p>
+                <p class='text-red-600 text-sm mt-1'>Archivo: $ruta</p>
+              </div>";
       }
     ?>
   </div>

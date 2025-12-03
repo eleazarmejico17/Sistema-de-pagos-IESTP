@@ -1,104 +1,64 @@
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = message;
-    toast.className = `toast show ${type}`;
-    setTimeout(() => {
-        toast.className = '';
-        toast.textContent = '';
-    }, 3000);
-}
+// js/login.js
+(() => {
+  "use strict";
 
-// Credenciales quemadas por rol
-const usuarios = {
-    "admin@institutocajas.edu.pe": { password: "admin123", rol: "admin" },
-    "bienestar@institutocajas.edu.pe": { password: "bien123", rol: "bienestar" },
-    "direccion@institutocajas.edu.pe": { password: "dir123", rol: "direccion" },
-    "usuario@institutocajas.edu.pe": { password: "user123", rol: "usuario" }
-};
+  const usuarios = [
+    { usuario: "admin",     password: "123456",  rol: "admin"     },
+    { usuario: "direccion", password: "dir123",  rol: "direccion" },
+    { usuario: "bienestar", password: "bien123", rol: "bienestar" },
+    { usuario: "usuario",   password: "user123", rol: "usuario"   }
+  ];
 
-// Simula login sin BD
-async function loginSimulado(email, password) {
-    const user = usuarios[email.trim().toLowerCase()];
-    if (!user) return { success: false, message: "Usuario no encontrado" };
-    if (user.password !== password) return { success: false, message: "Contraseña incorrecta" };
-    return { success: true, rol: user.rol };
-}
+  const redirectMap = {
+    admin:     "../views/dashboard-admin.php",
+    direccion: "../views/dashboard-direccion.php",
+    bienestar: "../views/dashboard-bienestar.php",
+    usuario:   "../views/dashboard-usuario.php"
+  };
 
-// Redirige según rol
-function redirigirPorRol(rol) {
-    const rutas = {
-        admin: "../../views/dashboard-admin.php",
-        bienestar: "../../views/dashboard-bienestar.php",
-        direccion: "../../views/dashboard-direccion.php",
-        usuario: "../../views/dashboard-usuario.php"
-    };
-    return rutas[rol] || "views/dashboard-usuario.php";
-}
+  function mostrarToast(mensaje, tipo = "error") {
+    const toast = document.getElementById("toast");
+    if (!toast) return;                       // si no hay toast, no pasa nada
+    toast.textContent = mensaje;
+    toast.className = `fixed top-6 right-6 px-5 py-3 rounded-lg text-white font-medium shadow-lg opacity-0 transform -translate-y-4 transition-all duration-300 z-50 show ${tipo}`;
+    setTimeout(() => toast.classList.remove("show"), 3000);
+  }
 
-// Simula conexión sin BD
-async function checkConnection() {
-    const statusEl = document.getElementById('db-status');
-    if (!statusEl) return;
+  function normalizar(txt) {
+    return typeof txt === "string" ? txt.trim().toLowerCase() : "";
+  }
 
-    try {
-        const res = await fetch('check-connection.php');
-        if (!res.ok) throw new Error("HTTP error");
-        const data = await res.json();
-        if (data.success) {
-            statusEl.textContent = 'Conexión: OK';
-            statusEl.className = 'text-green-300 text-center';
-        } else {
-            statusEl.textContent = 'Conexión: Fallida';
-            statusEl.className = 'text-red-300 text-center';
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("loginForm");
+    if (!form) return;                        // evita error si el script se carga fuera de login.html
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      try {
+        const usuario  = normalizar(document.getElementById("usuario")?.value);
+        const password = normalizar(document.getElementById("password")?.value);
+
+        const user = usuarios.find(
+          u => normalizar(u.usuario) === usuario && normalizar(u.password) === password
+        );
+
+        if (!user) {
+          mostrarToast("Usuario o contraseña incorrectos", "error");
+          return;
         }
-    } catch (err) {
-        statusEl.textContent = 'Conexión: Error';
-        statusEl.className = 'text-red-300 text-center';
-    }
-}
 
-// Inicio
-document.addEventListener('DOMContentLoaded', () => {
-    checkConnection();
-
-    const form = document.getElementById('loginForm');
-    if (!form) return;
-
-    form.addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const email = document.getElementById('email')?.value.trim();
-        const password = document.getElementById('password')?.value;
-        const loginBtn = document.getElementById('loginBtn');
-
-        if (!email || !password || !loginBtn) return;
-
-        loginBtn.disabled = true;
-        loginBtn.textContent = 'Cargando...';
-
-        // 🔍 TRAZAS
-        console.log('📩 email:', email);
-        console.log('🔑 password:', password);
-
-        const resultado = await loginSimulado(email, password);
-        console.log('📡 resultado:', resultado);
-
-        if (resultado.success) {
-            showToast('¡Bienvenido! Redirigiendo...', 'success');
-
-            const rol = resultado.rol;
-            console.log('🧭 rol recibido:', rol);
-
-            const url = redirigirPorRol(rol);
-            console.log('🎯 URL a la que voy:', url);
-
-            // 🚀 REDIRIGIR INMEDIATAMENTE
-            window.location.href = url;
-        } else {
-            showToast(resultado.message || 'Credenciales incorrectas', 'error');
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'Iniciar Sesión';
+        const destino = redirectMap[user.rol];
+        if (!destino) {                       // rol desconocido (nunca debería pasar)
+          mostrarToast("Rol no configurado", "error");
+          return;
         }
+
+        window.location.href = destino;       // redirección segura
+      } catch (err) {
+        console.error(err);
+        mostrarToast("Error inesperado. Inténtalo de nuevo.", "error");
+      }
     });
-});
+  });
+})();
