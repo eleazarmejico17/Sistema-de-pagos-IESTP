@@ -1,4 +1,6 @@
 <?php
+$rolesPermitidos = ['bienestar'];
+require_once __DIR__ . '/../public/aut.php';
 // Página actual
 $pagina = isset($_GET['pagina']) ? $_GET['pagina'] : 'registro-bienestar-estudiantil';
 

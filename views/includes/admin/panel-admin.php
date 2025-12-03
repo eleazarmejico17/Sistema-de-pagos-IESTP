@@ -1,7 +1,6 @@
 <?php
 
-require_once 'C:/xampp/htdocs/Sistema-de-pagos-IESTP/config/conexion-local.php';;
-
+require_once $_SERVER['DOCUMENT_ROOT'] . '/Sistema-de-pagos-IESTP-/config/conexion-local.php';
 $pagina = $_GET['pagina'] ?? 'panel-admin';
 
 switch ($pagina) {

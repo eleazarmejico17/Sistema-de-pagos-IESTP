@@ -1,4 +1,6 @@
 <?php
+$rolesPermitidos = ['usuario'];
+require_once __DIR__ . '/../public/aut.php';
 // Página actual
 $pagina = $_GET['pagina'] ?? 'usuario-solicitud';
 

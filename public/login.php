@@ -1,97 +1,38 @@
 <?php
-require_once '../config/conexion-local.php';
-
 session_start();
+header('Content-Type: application/json');
 
-// Recibir datos del formulario
-$usuario = $_POST['usuario'] ?? '';
-$password = $_POST['password'] ?? '';
+/* ---------- 1. Datos de prueba (más adelante vendrán de BD) ---------- */
+$usuarios = [
+    ['usuario' => 'admin',     'password' => '123456',  'rol' => 'admin'],
+    ['usuario' => 'direccion', 'password' => 'dir123',  'rol' => 'direccion'],
+    ['usuario' => 'bienestar', 'password' => 'bien123', 'rol' => 'bienestar'],
+    ['usuario' => 'usuario',   'password' => 'user123', 'rol' => 'usuario'],
+];
 
-// Validar entrada
-if (empty($usuario) || empty($password)) {
-    header("Location: login.html");
-    exit();
+/* ---------- 2. Recibimos credenciales ---------- */
+$input = json_decode(file_get_contents('php://input'), true);
+$usuario  = strtolower(trim($input['usuario']   ?? ''));
+$password = strtolower(trim($input['password'] ?? ''));
+
+/* ---------- 3. Buscamos el usuario ---------- */
+$user = null;
+foreach ($usuarios as $u) {
+    if ($u['usuario'] === $usuario && $u['password'] === $password) {
+        $user = $u;
+        break;
+    }
 }
 
-try {
-    $db = Database::getInstance();
-    $pdo = $db->getConnection();
-
-    // Buscar usuario
-    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE usuario = ? LIMIT 1");
-    $stmt->execute([$usuario]);
-    $user = $stmt->fetch();
-
-    if (!$user || !password_verify($password, $user['password'])) {
-        // Credenciales incorrectas
-        header("Location: login.html");
-        exit();
-    }
-
-    // Guardar datos en sesión
-    $_SESSION['usuario_id'] = $user['id'];
-    $_SESSION['tipo_usuario'] = $user['tipo']; // 1 = empleado, 2 = estudiante
-    $_SESSION['estuempleado_id'] = $user['estuempleado'];
-
-    // Redirigir según tipo
-    if ($user['tipo'] == 2) {
-        // Estudiante
-        header("Location: views/dashboard-usuario.php");
-        exit();
-    } elseif ($user['tipo'] == 1) {
-        // Empleado
-        $empleadoId = $user['estuempleado'];
-
-        // Obtener prog_estudios del empleado
-        $stmt = $pdo->prepare("SELECT prog_estudios FROM empleado WHERE id = ? LIMIT 1");
-        $stmt->execute([$empleadoId]);
-        $empleado = $stmt->fetch();
-
-        if (!$empleado) {
-            header("Location: login.html");
-            exit();
-        }
-
-        $progEstudiosId = $empleado['prog_estudios'];
-
-        // Obtener nombre del programa
-        $stmt = $pdo->prepare("SELECT nom_progest FROM prog_estudios WHERE id = ? LIMIT 1");
-        $stmt->execute([$progEstudiosId]);
-        $prog = $stmt->fetch();
-
-        if (!$prog) {
-            header("Location: login.html");
-            exit();
-        }
-
-        $nomProgest = strtoupper(trim($prog['nom_progest']));
-
-        // Redirigir según el nombre del programa
-        switch ($nomProgest) {
-            case 'ADMINSISPAGOS':
-                header("Location: views/dashboard-admin.php");
-                break;
-            case 'BIENESTARSISPAGOS':
-                header("Location: views/dashboard-bienestar.php");
-                break;
-            case 'DIRECIONSISPAGOS':
-                header("Location: views/dashboard-direcion.php");
-                break;
-            default:
-                header("Location: login.html");
-                exit();
-        }
-        exit();
-    } else {
-        // Tipo no válido
-        header("Location: login.html");
-        exit();
-    }
-
-} catch (Exception $e) {
-    // Error de conexión o consulta
-    error_log("Error en login: " . $e->getMessage());
-    header("Location: login.html");
-    exit();
+if (!$user) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Usuario o contraseña incorrectos']);
+    exit;
 }
-?>
+
+/* ---------- 4. Creamos la sesión ---------- */
+$_SESSION['usuario'] = $user['usuario'];
+$_SESSION['rol']     = $user['rol'];
+
+/* ---------- 5. Respondemos con la ruta a la que debe ir el front ---------- */
+echo json_encode(['redirect' => "../views/dashboard-{$user['rol']}.php"]);
