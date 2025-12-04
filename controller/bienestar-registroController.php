@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../models/bienestar-beneficiariosModel.php';
-require_once __DIR__ . '/../models/bienestar-resolucionesModel.php';
+require_once "../models/bienestarBeneficiariosModel.php";
+require_once "../models/bienestarResolucionesModel.php";
 
 class BienestarRegistroController {
     private $beneficiarioModel;
@@ -15,6 +15,7 @@ class BienestarRegistroController {
         return $this->beneficiarioModel->buscarEstudiantePorDNI($dni);
     }
 
+    
     public function crearBeneficiario($data) {
         return $this->beneficiarioModel->crear($data);
     }
