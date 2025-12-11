@@ -54,7 +54,19 @@
 
           <!-- Datos del usuario -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-id-card text-purple-500"></i> DNI del estudiante
+                </label>
+                <input 
+                type="text"
+                name="dni"
+                id="dni"
+                maxlength="8"
+                placeholder="Ingrese DNI"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-purple-400 focus:outline-none transition"
+                required>
+            </div>
             <div class="flex flex-col gap-2">
               <label class="font-medium text-gray-700 flex items-center gap-2">
                 <i class="fas fa-user text-blue-500"></i> Nombre completo
@@ -167,137 +179,123 @@
   </main>
 
   <script>
-    // Función para ocultar mensajes
-    function ocultarMensaje() {
-      document.getElementById('mensajeExito').classList.add('hidden');
-      document.getElementById('mensajeError').classList.add('hidden');
+function ocultarMensaje() {
+  document.getElementById('mensajeExito').classList.add('hidden');
+  document.getElementById('mensajeError').classList.add('hidden');
+}
+
+// SOLO NÚMEROS EN DNI Y TELÉFONO
+document.getElementById("dni").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/\D/g, "");
+});
+
+document.getElementById("telefono").addEventListener("input", e => {
+  e.target.value = e.target.value.replace(/\D/g, "");
+});
+
+// VALIDACIÓN DE ARCHIVOS
+function validarArchivos(input) {
+  const errorElement = document.getElementById('errorArchivos');
+  const archivos = input.files;
+  let errores = [];
+
+  if (archivos.length > 5) errores.push("Máximo 5 archivos");
+
+  const tiposPermitidos = ['image/jpeg','image/png','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+  for (let archivo of archivos) {
+    if (archivo.size > 5 * 1024 * 1024) errores.push(`${archivo.name} excede 5MB`);
+    if (!tiposPermitidos.includes(archivo.type)) errores.push(`${archivo.name} tipo no permitido`);
+  }
+
+  if (errores.length) {
+    errorElement.textContent = errores.join(" | ");
+    errorElement.classList.remove("hidden");
+    input.value = "";
+    return false;
+  } else {
+    errorElement.classList.add("hidden");
+    return true;
+  }
+}
+
+// VALIDACIÓN COMPLETA DEL FORMULARIO
+document.getElementById("formSolicitud").addEventListener("submit", function(e) {
+  e.preventDefault();
+  ocultarMensaje();
+
+  const dni = document.getElementById("dni").value.trim();
+  const nombre = document.getElementById("nombre").value.trim();
+  const telefono = document.getElementById("telefono").value.trim();
+  const tipo = document.getElementById("tipo").value;
+  const fecha = document.getElementById("fecha").value;
+  const descripcion = document.getElementById("descripcion").value.trim();
+  const archivoInput = document.getElementById("archivo");
+  const mensajeError = document.getElementById("textoError");
+
+  // VALIDACIONES
+  let errores = [];
+
+  if (!/^\d{8}$/.test(dni)) errores.push("DNI inválido (8 dígitos)");
+
+  if (!/^[a-zA-ZÁÉÍÓÚáéíóúñÑ\s]{6,}$/.test(nombre)) errores.push("Nombre inválido");
+
+  if (!/^9\d{8}$/.test(telefono)) errores.push("Teléfono inválido");
+
+  if (!tipo) errores.push("Seleccione un tipo de solicitud");
+
+  const hoy = new Date().toISOString().split("T")[0];
+  if (fecha > hoy) errores.push("Fecha no válida");
+
+  if (descripcion.length < 10) errores.push("Descripción muy corta (mínimo 10 caracteres)");
+
+  if (archivoInput.files.length > 0 && !validarArchivos(archivoInput)) return;
+
+  if (errores.length > 0) {
+    document.getElementById("mensajeError").classList.remove("hidden");
+    mensajeError.textContent = errores.join(" | ");
+    return;
+  }
+
+  // UI LOADING
+  document.getElementById("btnEnviar").classList.add("hidden");
+  document.getElementById("btnLoading").classList.remove("hidden");
+
+  // ENVÍO AJAX
+  const formData = new FormData(this);
+
+  fetch('../controller/guardarSolicitudController.php', {
+    method: "POST",
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById("mensajeExito").classList.remove("hidden");
+      document.getElementById("textoExito").textContent = data.message;
+      document.getElementById("formSolicitud").reset();
+      document.getElementById("fecha").value = hoy;
+    } else {
+      document.getElementById("mensajeError").classList.remove("hidden");
+      mensajeError.textContent = data.error;
     }
+  })
+  .catch(() => {
+    document.getElementById("mensajeError").classList.remove("hidden");
+    mensajeError.textContent = "Error de conexión con el servidor";
+  })
+  .finally(() => {
+    document.getElementById("btnEnviar").classList.remove("hidden");
+    document.getElementById("btnLoading").classList.add("hidden");
+  });
+});
 
-    // Validar archivos antes de subir
-    function validarArchivos(input) {
-      const errorElement = document.getElementById('errorArchivos');
-      const archivos = input.files;
-      let errores = [];
+// FECHA HOY AUTOMÁTICA
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+});
+</script>
 
-      // Validar cantidad de archivos
-      if (archivos.length > 5) {
-        errores.push('Máximo 5 archivos permitidos');
-        input.value = '';
-      }
-
-      // Validar tamaño y tipo de cada archivo
-      for (let i = 0; i < archivos.length; i++) {
-        const archivo = archivos[i];
-        
-        // Validar tamaño (5MB)
-        if (archivo.size > 5 * 1024 * 1024) {
-          errores.push(`El archivo "${archivo.name}" excede el tamaño máximo de 5MB`);
-        }
-        
-        // Validar tipo
-        const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-        if (!tiposPermitidos.includes(archivo.type)) {
-          errores.push(`El archivo "${archivo.name}" no es un tipo válido`);
-        }
-      }
-
-      if (errores.length > 0) {
-        errorElement.textContent = errores.join(', ');
-        errorElement.classList.remove('hidden');
-        input.value = '';
-      } else {
-        errorElement.classList.add('hidden');
-      }
-    }
-
-    // Manejar envío del formulario
-    document.getElementById('formSolicitud').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const btnEnviar = document.getElementById('btnEnviar');
-      const btnLoading = document.getElementById('btnLoading');
-      const mensajeExito = document.getElementById('mensajeExito');
-      const mensajeError = document.getElementById('mensajeError');
-      
-      // Ocultar mensajes anteriores
-      ocultarMensaje();
-      
-      // Mostrar loading
-      btnEnviar.classList.add('hidden');
-      btnLoading.classList.remove('hidden');
-      
-      // Crear FormData
-      const formData = new FormData(this);
-      
-      // Enviar via AJAX
-      fetch('../controller/guardarSolicitudController.php', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Mostrar mensaje de éxito
-          mensajeExito.classList.remove('hidden');
-          document.getElementById('textoExito').textContent = data.message;
-          
-          // Limpiar formulario completamente
-          document.getElementById('formSolicitud').reset();
-          
-          // Restablecer fecha actual
-          const fechaInput = document.getElementById('fecha');
-          const hoy = new Date().toISOString().split('T')[0];
-          fechaInput.value = hoy;
-          
-          // Ocultar mensaje después de 5 segundos
-          setTimeout(() => {
-            mensajeExito.classList.add('hidden');
-          }, 5000);
-          
-        } else {
-          // Mostrar mensaje de error
-          mensajeError.classList.remove('hidden');
-          document.getElementById('textoError').textContent = data.error;
-        }
-      })
-      .catch(error => {
-        // Mostrar mensaje de error de conexión
-        mensajeError.classList.remove('hidden');
-        document.getElementById('textoError').textContent = 'Error de conexión: ' + error.message;
-      })
-      .finally(() => {
-        // Ocultar loading
-        btnEnviar.classList.remove('hidden');
-        btnLoading.classList.add('hidden');
-      });
-    });
-
-    // Establecer fecha actual por defecto al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
-      const fechaInput = document.getElementById('fecha');
-      const hoy = new Date().toISOString().split('T')[0];
-      fechaInput.value = hoy;
-      
-      // Enfocar en el primer campo
-      document.getElementById('nombre').focus();
-    });
-
-    // Función para limpiar formulario manualmente (si la necesitas)
-    function limpiarFormulario() {
-      document.getElementById('formSolicitud').reset();
-      
-      // Restablecer fecha actual
-      const fechaInput = document.getElementById('fecha');
-      const hoy = new Date().toISOString().split('T')[0];
-      fechaInput.value = hoy;
-      
-      // Ocultar mensajes
-      ocultarMensaje();
-      
-      // Enfocar en el primer campo
-      document.getElementById('nombre').focus();
-    }
-  </script>
 
 </body>
 </html>
