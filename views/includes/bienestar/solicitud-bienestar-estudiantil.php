@@ -6,7 +6,14 @@ $errorConsulta = null;
 $totalSolicitudes = 0;
 
 try {
-    $db = Database::getInstance()->getConnection();
+    // Intentar con Database primero, luego con Conexion para compatibilidad
+    if (class_exists('Database')) {
+        $db = Database::getInstance()->getConnection();
+    } elseif (class_exists('Conexion')) {
+        $db = Conexion::getInstance()->getConnection();
+    } else {
+        throw new Exception("No se encontró la clase de conexión");
+    }
 
     // Primero verificar que la tabla existe y tiene datos
     $checkTable = $db->query("SHOW TABLES LIKE 'solicitud'");

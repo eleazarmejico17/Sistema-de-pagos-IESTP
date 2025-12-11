@@ -58,14 +58,22 @@
               <label class="font-medium text-gray-700 flex items-center gap-2">
                     <i class="fas fa-id-card text-purple-500"></i> DNI del estudiante
                 </label>
-                <input 
-                type="text"
-                name="dni"
-                id="dni"
-                maxlength="8"
-                placeholder="Ingrese DNI"
-                class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-purple-400 focus:outline-none transition"
-                required>
+                <div class="relative">
+                  <input 
+                    type="text"
+                    name="dni"
+                    id="dni"
+                    maxlength="8"
+                    placeholder="Ingrese DNI (8 dígitos)"
+                    class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-purple-400 focus:outline-none transition pr-10"
+                    required>
+                  <span id="dniLoader" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <i class="fas fa-spinner fa-spin text-purple-500"></i>
+                  </span>
+                  <span id="dniCheck" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <i class="fas fa-check-circle text-green-500"></i>
+                  </span>
+                </div>
             </div>
             <div class="flex flex-col gap-2">
               <label class="font-medium text-gray-700 flex items-center gap-2">
@@ -185,8 +193,26 @@ function ocultarMensaje() {
 }
 
 // SOLO NÚMEROS EN DNI Y TELÉFONO
-document.getElementById("dni").addEventListener("input", e => {
+const dniInput = document.getElementById("dni");
+const nombreInput = document.getElementById("nombre");
+const telefonoInput = document.getElementById("telefono");
+
+dniInput.addEventListener("input", e => {
   e.target.value = e.target.value.replace(/\D/g, "");
+  
+  // Búsqueda automática cuando se ingresen 8 dígitos
+  const dni = e.target.value.trim();
+  if (dni.length === 8) {
+    buscarEstudiantePorDNI(dni);
+  } else if (dni.length < 8) {
+    // Limpiar campos si se borra el DNI
+    nombreInput.value = "";
+    telefonoInput.value = "";
+    // Ocultar íconos de estado
+    document.getElementById("dniLoader").classList.add("hidden");
+    document.getElementById("dniCheck").classList.add("hidden");
+    dniInput.style.borderColor = "";
+  }
 });
 
 document.getElementById("telefono").addEventListener("input", e => {
@@ -289,6 +315,95 @@ document.getElementById("formSolicitud").addEventListener("submit", function(e) 
     document.getElementById("btnLoading").classList.add("hidden");
   });
 });
+
+// FUNCIÓN PARA BUSCAR ESTUDIANTE POR DNI
+function buscarEstudiantePorDNI(dni) {
+  const dniLoader = document.getElementById("dniLoader");
+  const dniCheck = document.getElementById("dniCheck");
+  
+  // Mostrar indicador de carga
+  dniInput.disabled = true;
+  dniInput.style.backgroundColor = "#f3f4f6";
+  dniLoader.classList.remove("hidden");
+  dniCheck.classList.add("hidden");
+  
+  // Limpiar mensajes previos
+  ocultarMensaje();
+  
+  // Calcular ruta correcta según la ubicación actual
+  const currentPath = window.location.pathname;
+  let apiPath;
+  
+  if (currentPath.includes('/views/')) {
+    // Desde dashboard-usuario.php en views/
+    apiPath = '../controller/buscarEstudianteSolicitud.php';
+  } else {
+    // Ruta alternativa
+    apiPath = '../../controller/buscarEstudianteSolicitud.php';
+  }
+  
+  fetch(`${apiPath}?dni=${dni}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.estudiante) {
+        // Autocompletar campos
+        nombreInput.value = data.estudiante.nombre_completo || "";
+        telefonoInput.value = data.estudiante.telefono || "";
+        
+        // Mostrar check de éxito
+        dniLoader.classList.add("hidden");
+        dniCheck.classList.remove("hidden");
+        
+        // Estilo visual de éxito
+        nombreInput.style.borderColor = "#10b981";
+        telefonoInput.style.borderColor = "#10b981";
+        dniInput.style.borderColor = "#10b981";
+        
+        // Remover estilo después de 2 segundos
+        setTimeout(() => {
+          nombreInput.style.borderColor = "";
+          telefonoInput.style.borderColor = "";
+          dniInput.style.borderColor = "";
+          dniCheck.classList.add("hidden");
+        }, 2000);
+      } else {
+        // Limpiar campos si no se encontró
+        nombreInput.value = "";
+        telefonoInput.value = "";
+        dniLoader.classList.add("hidden");
+        dniCheck.classList.add("hidden");
+        
+        // Mostrar mensaje de advertencia
+        document.getElementById("mensajeError").classList.remove("hidden");
+        document.getElementById("textoError").textContent = data.message || "No se encontró un estudiante con ese DNI";
+        
+        // Auto-ocultar mensaje después de 3 segundos
+        setTimeout(() => {
+          ocultarMensaje();
+        }, 3000);
+      }
+    })
+    .catch(error => {
+      console.error("Error al buscar estudiante:", error);
+      nombreInput.value = "";
+      telefonoInput.value = "";
+      dniLoader.classList.add("hidden");
+      dniCheck.classList.add("hidden");
+      
+      // Mostrar mensaje de error
+      document.getElementById("mensajeError").classList.remove("hidden");
+      document.getElementById("textoError").textContent = "Error al conectar con el servidor. Intente nuevamente.";
+      
+      setTimeout(() => {
+        ocultarMensaje();
+      }, 3000);
+    })
+    .finally(() => {
+      // Rehabilitar campo DNI
+      dniInput.disabled = false;
+      dniInput.style.backgroundColor = "";
+    });
+}
 
 // FECHA HOY AUTOMÁTICA
 document.addEventListener("DOMContentLoaded", () => {

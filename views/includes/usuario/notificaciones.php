@@ -1,21 +1,56 @@
 <?php
 require_once __DIR__ . "/../../../config/conexion.php";
 
-$db = Conexion::getInstance()->getConnection();
+$notificaciones = [];
+$errorConsulta = null;
 
-$sql = "SELECT * FROM solicitudes 
-        WHERE estado IN ('Aprobado', 'Rechazado') 
-        AND notificacion_enviada = TRUE
-        ORDER BY fecha_respuesta DESC";
-$stmt = $db->prepare($sql);
-$stmt->execute();
-$notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+try {
+    $db = Conexion::getInstance()->getConnection();
+    
+    // Obtener notificaciones de la tabla solicitud que estén aprobadas o rechazadas
+    // y que tengan notificacion_enviada = 1 o fecha_respuesta no nula
+    $sql = "SELECT 
+                s.id,
+                s.nombre,
+                s.telefono,
+                s.correo,
+                s.tipo_solicitud,
+                s.descripcion,
+                s.archivos,
+                s.fecha,
+                COALESCE(s.estado, 'Pendiente') AS estado,
+                s.motivo_respuesta,
+                s.fecha_respuesta,
+                s.fecha_registro,
+                COALESCE(s.notificacion_enviada, 0) AS notificacion_enviada
+            FROM solicitud s
+            WHERE s.estado IN ('Aprobado', 'Rechazado')
+            AND (s.notificacion_enviada = 1 OR s.fecha_respuesta IS NOT NULL)
+            ORDER BY COALESCE(s.fecha_respuesta, s.fecha_registro, s.fecha, NOW()) DESC
+            LIMIT 50";
+    
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+} catch (PDOException $e) {
+    $errorConsulta = "Error de base de datos: " . $e->getMessage();
+    error_log('Error PDO en notificaciones: ' . $e->getMessage());
+} catch (Exception $e) {
+    $errorConsulta = "Error: " . $e->getMessage();
+    error_log('Error en notificaciones: ' . $e->getMessage());
+}
 ?>
 
-<main class="flex-1 p-8">
+<section class="w-full space-y-4">
   <h1 class="text-2xl font-bold mb-6 text-gray-800">Notificaciones</h1>
 
-<?php if (empty($notificaciones)): ?>
+<?php if ($errorConsulta): ?>
+  <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+    <p class="font-semibold">Error al cargar notificaciones:</p>
+    <p><?= htmlspecialchars($errorConsulta, ENT_QUOTES, 'UTF-8') ?></p>
+  </div>
+<?php elseif (empty($notificaciones)): ?>
 
   <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 text-center">
     <div class="text-gray-400 text-6xl mb-4">🔕</div>
@@ -37,19 +72,23 @@ $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <div class="absolute right-5 top-5 text-red-500 text-xl font-bold">❌</div>
 
   <!-- RESUMEN -->
-  <p class="font-semibold text-gray-800">OF. Bienestar Estudiantil</p>
-  <span class="inline-block text-xs mt-2 bg-red-100 text-red-700 px-3 py-1 rounded-full">
-    Solicitud Rechazada
-  </span>
+  <div class="flex justify-between items-center">
+    <div>
+      <p class="font-semibold text-gray-800"><?= htmlspecialchars($notif['nombre'] ?? 'OF. Bienestar Estudiantil', ENT_QUOTES, 'UTF-8') ?></p>
+      <span class="inline-block text-xs mt-2 bg-red-100 text-red-700 px-3 py-1 rounded-full">
+        Solicitud Rechazada
+      </span>
+    </div>
+  </div>
 
   <!-- DETALLE -->
   <div class="detalle-notificacion hidden mt-4">
 
     <p class="text-gray-700 text-sm leading-relaxed mt-3">
-      Hola <span class="font-medium"><?= htmlspecialchars($notif['nombre_completo']) ?></span>,
+      Hola <span class="font-medium"><?= htmlspecialchars($notif['nombre'] ?? 'Usuario', ENT_QUOTES, 'UTF-8') ?></span>,
       su solicitud ha sido <span class="font-bold text-red-600">rechazada</span>
       <?php if (!empty($notif['motivo_respuesta'])): ?>
-        debido a que <?= htmlspecialchars($notif['motivo_respuesta']) ?>.
+        debido a que <?= htmlspecialchars($notif['motivo_respuesta'], ENT_QUOTES, 'UTF-8') ?>.
       <?php else: ?>
         por motivos administrativos.
       <?php endif; ?>
@@ -98,13 +137,14 @@ $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
      class="cursor-pointer bg-white rounded-2xl shadow-lg border border-blue-200 p-6 hover:shadow-xl transition">
 
   <div class="flex justify-between items-center">
-    <p class="font-semibold text-gray-800"><?= htmlspecialchars($notif['nombre_completo']) ?></p>
+    <div>
+      <p class="font-semibold text-gray-800"><?= htmlspecialchars($notif['nombre'] ?? 'Usuario', ENT_QUOTES, 'UTF-8') ?></p>
+      <span class="inline-block mt-2 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+        Solicitud Aprobada
+      </span>
+    </div>
     <span class="text-blue-500 text-xl font-bold">✔️</span>
   </div>
-
-  <span class="inline-block mt-2 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
-    Solicitud Aprobada
-  </span>
 
   <div class="detalle-notificacion hidden mt-4">
     <p class="text-gray-600 text-sm">
@@ -125,7 +165,7 @@ $notificaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 <?php endforeach; ?>
 <?php endif; ?>
-</main>
+</section>
 
 <!-- MODAL DE IMAGEN -->
 <div id="modalImagen" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4">
