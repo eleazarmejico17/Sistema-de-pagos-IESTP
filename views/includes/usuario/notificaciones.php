@@ -106,31 +106,47 @@ try {
       </span>
     </div>
 
-<?php if ($notif['archivos']): ?>
-  <div class="mt-4">
-    <p class="font-semibold text-gray-700 text-sm mb-2">Evidencias</p>
-    <div class="flex flex-wrap gap-3">
-      <?php 
-      $archivos = explode(",", $notif['archivos']);
-      foreach($archivos as $archivo): 
-        $archivo = trim($archivo);
-        if ($archivo === '') continue;
-        $extension = strtolower(pathinfo($archivo, PATHINFO_EXTENSION));
-        $ruta = "../uploads/solicitudes/" . rawurlencode($archivo);
-        $archivoSeguro = htmlspecialchars($archivo, ENT_QUOTES, 'UTF-8');
-        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])): ?>
-          <div onclick="event.stopPropagation(); abrirImagen('<?= $ruta ?>')"
-               class="w-24 h-20 bg-gray-100 rounded-xl overflow-hidden hover:shadow cursor-pointer">
-            <img src="<?= $ruta ?>" class="w-full h-full object-cover">
-          </div>
-        <?php else: ?>
-          <div class="w-24 h-20 flex items-center justify-center border rounded-xl text-xs text-gray-500">
-            <?= $archivoSeguro ?>
-          </div>
-        <?php endif; endforeach; ?>
+    <?php if ($notif['archivos']): ?>
+    <div class="mt-4">
+      <p class="font-semibold text-gray-700 text-sm mb-2 flex items-center gap-2">
+        <i class="fas fa-paperclip text-red-500"></i>
+        Evidencias
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <?php 
+        $archivos = !empty($notif['archivos']) ? explode(",", $notif['archivos']) : [];
+        $hayArchivos = false;
+
+        foreach($archivos as $archivo): 
+          $archivo = trim($archivo);
+          if ($archivo === '') continue;
+
+          $hayArchivos = true;
+          $extension = strtolower(pathinfo($archivo, PATHINFO_EXTENSION));
+          $ruta = "../uploads/solicitudes/" . rawurlencode($archivo);
+          $archivoSeguro = htmlspecialchars($archivo, ENT_QUOTES, 'UTF-8');
+
+          if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+            <div onclick="event.stopPropagation(); abrirImagen('<?= $ruta ?>')"
+                 class="group/thumb w-24 h-20 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 hover:border-red-300 hover:shadow-lg cursor-pointer transition-all">
+              <img src="<?= $ruta ?>" class="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300">
+            </div>
+          <?php else: ?>
+            <a href="<?= $ruta ?>" target="_blank"
+               onclick="event.stopPropagation();"
+               class="w-28 h-20 flex flex-col items-center justify-center border border-gray-200 rounded-xl text-[11px] text-gray-600 bg-gray-50 hover:bg-red-50 hover:border-red-300 hover:shadow transition-all px-1 text-center">
+              <i class="fas fa-file-alt text-red-400 text-lg mb-1"></i>
+              <span class="truncate w-full"><?= $archivoSeguro ?></span>
+            </a>
+          <?php endif; 
+        endforeach; 
+
+        if (!$hayArchivos): ?>
+          <p class="text-gray-400 text-xs italic">No se adjuntaron evidencias en esta solicitud.</p>
+        <?php endif; ?>
+      </div>
     </div>
-  </div>
-<?php endif; ?>
+    <?php endif; ?>
 
 </div> <!-- DETALLE -->
 </div> <!-- TARJETA -->
@@ -152,15 +168,57 @@ try {
   </div>
 
   <div class="detalle-notificacion hidden mt-4">
-    <p class="text-gray-600 text-sm">
-      Esta solicitud fue aprobada correctamente.
+    <p class="text-gray-600 text-sm mb-3">
+      Tu solicitud fue aprobada correctamente.
     </p>
 
-    <div class="mt-3">
+    <div class="mt-1 mb-4">
       <span class="inline-block bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full">
         N°<?= $notif['id'] ?> <?= htmlspecialchars($notif['tipo_solicitud']) ?>
       </span>
     </div>
+
+    <?php if ($notif['archivos']): ?>
+    <div class="mt-1">
+      <p class="font-semibold text-gray-700 text-sm mb-2 flex items-center gap-2">
+        <i class="fas fa-paperclip text-blue-500"></i>
+        Evidencias
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <?php 
+        $archivosAprob = !empty($notif['archivos']) ? explode(",", $notif['archivos']) : [];
+        $hayArchivosAprob = false;
+
+        foreach($archivosAprob as $archivoA): 
+          $archivoA = trim($archivoA);
+          if ($archivoA === '') continue;
+
+          $hayArchivosAprob = true;
+          $extensionA = strtolower(pathinfo($archivoA, PATHINFO_EXTENSION));
+          $rutaA = "../uploads/solicitudes/" . rawurlencode($archivoA);
+          $archivoSeguroA = htmlspecialchars($archivoA, ENT_QUOTES, 'UTF-8');
+
+          if (in_array($extensionA, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+            <div onclick="event.stopPropagation(); abrirImagen('<?= $rutaA ?>')"
+                 class="group/thumb w-24 h-20 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 hover:border-blue-300 hover:shadow-lg cursor-pointer transition-all">
+              <img src="<?= $rutaA ?>" class="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300">
+            </div>
+          <?php else: ?>
+            <a href="<?= $rutaA ?>" target="_blank"
+               onclick="event.stopPropagation();"
+               class="w-28 h-20 flex flex-col items-center justify-center border border-gray-200 rounded-xl text-[11px] text-gray-600 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 hover:shadow transition-all px-1 text-center">
+              <i class="fas fa-file-alt text-blue-400 text-lg mb-1"></i>
+              <span class="truncate w-full"><?= $archivoSeguroA ?></span>
+            </a>
+          <?php endif; 
+        endforeach; 
+
+        if (!$hayArchivosAprob): ?>
+          <p class="text-gray-400 text-xs italic">No se adjuntaron evidencias en esta solicitud.</p>
+        <?php endif; ?>
+      </div>
+    </div>
+    <?php endif; ?>
   </div>
 
 </div>
