@@ -26,7 +26,7 @@ if (empty($solicitudesAprobadas)) {
     
     // Verificar todos los estados en la BD
     try {
-        $conn = new PDO("mysql:host=localhost;dbname=sistema_pagos", "root", "");
+        $conn = new PDO("mysql:host=localhost;dbname=db_sistema", "root", "");
         $sql = "SELECT DISTINCT estado FROM solicitud ORDER BY estado";
         $stmt = $conn->prepare($sql);
         $stmt->execute();

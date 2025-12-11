@@ -72,6 +72,67 @@ try {
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
+    // SI ESTADO ES APROBADO, CREAR BENEFICIARIO AUTOMÁTICAMENTE
+    if ($estado === 'Aprobado' || $estado === 'aprobado' || $estado === 'APROBADO') {
+        try {
+            // Obtener datos de la solicitud y resolución
+            $stmtSol = $db->prepare("
+                SELECT s.estudiante, s.resoluciones, r.monto_descuento, r.numero_resolucion
+                FROM solicitudes s
+                LEFT JOIN resoluciones r ON s.resoluciones = r.id
+                WHERE s.id = :id
+            ");
+            $stmtSol->execute([':id' => $id]);
+            $solicitudData = $stmtSol->fetch(PDO::FETCH_ASSOC);
+            
+            if ($solicitudData && $solicitudData['estudiante'] && $solicitudData['resoluciones']) {
+                // Verificar si ya existe un beneficiario para esta combinación
+                $checkBenef = $db->prepare("
+                    SELECT id FROM beneficiarios 
+                    WHERE estudiante = :estudiante AND resoluciones = :resoluciones
+                ");
+                $checkBenef->execute([
+                    ':estudiante' => $solicitudData['estudiante'],
+                    ':resoluciones' => $solicitudData['resoluciones']
+                ]);
+                
+                if ($checkBenef->rowCount() === 0) {
+                    // Crear nuevo beneficiario
+                    $porcentajeDescuento = $solicitudData['monto_descuento'] ?? 0;
+                    
+                    $insertBenef = $db->prepare("
+                        INSERT INTO beneficiarios 
+                        (estudiante, resoluciones, porcentaje_descuento, fecha_inicio, activo, registrado_por, registrado_en)
+                        VALUES (:estudiante, :resoluciones, :porcentaje, CURDATE(), 1, :empleado, NOW())
+                    ");
+                    $insertBenef->execute([
+                        ':estudiante' => $solicitudData['estudiante'],
+                        ':resoluciones' => $solicitudData['resoluciones'],
+                        ':porcentaje' => $porcentajeDescuento,
+                        ':empleado' => $empleadoId
+                    ]);
+                    
+                    // Agregar al historial de descuentos
+                    $beneficiarioId = $db->lastInsertId();
+                    $insertHistorial = $db->prepare("
+                        INSERT INTO historial_descuentos 
+                        (beneficiario_id, monto_original, porcentaje_descuento, monto_descuento, monto_final, aplicado_por, aplicado_en, observaciones)
+                        VALUES (:benef, 0, :porcentaje, 0, 0, :empleado, NOW(), :observacion)
+                    ");
+                    $insertHistorial->execute([
+                        ':benef' => $beneficiarioId,
+                        ':porcentaje' => $porcentajeDescuento,
+                        ':empleado' => $empleadoId,
+                        ':observacion' => 'Descuento aplicado automáticamente por aprobación de solicitud ' . $solicitudData['numero_resolucion']
+                    ]);
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error creando beneficiario: " . $e->getMessage());
+            // No fallar el proceso principal si hay error en la creación del beneficiario
+        }
+    }
+
     // INSERTAR HISTORIAL SI EXISTE EMPLEADO
     if ($empleadoId !== null) {
         $historial = $db->prepare("

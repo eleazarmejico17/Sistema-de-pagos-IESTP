@@ -3,6 +3,70 @@
 require_once __DIR__ . '/../../../config/conexion.php';
 $pdo = Conexion::getInstance()->getConnection();
 
+// Función para obtener descuentos activos del estudiante
+function obtenerDescuentosActivos($pdo, $estudianteId) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                b.id as beneficiario_id,
+                b.porcentaje_descuento,
+                r.numero_resolucion,
+                r.titulo,
+                r.monto_descuento as monto_resolucion
+            FROM beneficiarios b
+            INNER JOIN resoluciones r ON b.resoluciones = r.id
+            WHERE b.estudiante = :estudiante_id 
+            AND b.activo = 1 
+            AND (b.fecha_fin IS NULL OR b.fecha_fin >= CURDATE())
+            AND (b.fecha_inicio IS NULL OR b.fecha_inicio <= CURDATE())
+            ORDER BY b.porcentaje_descuento DESC
+        ");
+        $stmt->execute([':estudiante_id' => $estudianteId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Error obteniendo descuentos: " . $e->getMessage());
+        return [];
+    }
+}
+
+// Función para obtener ID del estudiante desde sesión
+function obtenerEstudianteIdDesdeSesion($pdo) {
+    if (!isset($_SESSION['usuario'])) {
+        return null;
+    }
+    
+    $usuarioSesion = $_SESSION['usuario'];
+    
+    // Método 1: Buscar por campo 'usuario' exacto
+    $stmt = $pdo->prepare("SELECT id, tipo, estuempleado FROM usuarios WHERE usuario = :usuario LIMIT 1");
+    $stmt->execute([':usuario' => $usuarioSesion]);
+    $usuarioRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($usuarioRow && $usuarioRow['tipo'] == 2 && !empty($usuarioRow['estuempleado'])) {
+        return (int)$usuarioRow['estuempleado'];
+    }
+    
+    // Método 2: Extraer DNI del usuario
+    if (preg_match('/^(\d{8})(@|$)/', $usuarioSesion, $matches)) {
+        $dni = $matches[1];
+        $stmt = $pdo->prepare("SELECT id FROM estudiante WHERE dni_est = :dni LIMIT 1");
+        $stmt->execute([':dni' => $dni]);
+        $est = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($est) {
+            return (int)$est['id'];
+        }
+    }
+    
+    return null;
+}
+
+// Obtener ID del estudiante actual
+$estudianteIdActual = obtenerEstudianteIdDesdeSesion($pdo);
+$descuentosActivos = [];
+if ($estudianteIdActual) {
+    $descuentosActivos = obtenerDescuentosActivos($pdo, $estudianteIdActual);
+}
+
 // Verificar y agregar campo UIT si no existe
 try {
     $stmt = $pdo->query("SHOW COLUMNS FROM tipo_pago LIKE 'uit'");
@@ -16,30 +80,26 @@ try {
     error_log("Error verificando campo UIT: " . $e->getMessage());
 }
 
-// Obtener datos con UIT - solo conceptos con formato numérico (1.1, 1.2, etc.) excluyendo métodos de pago
+// Obtener TODOS los datos con UIT - mostrar todos los conceptos de pago ordenados por ID
 try {
     $stmt = $pdo->query("
         SELECT id, nombre, descripcion, COALESCE(uit, 0.00) as uit 
         FROM tipo_pago 
-        WHERE nombre REGEXP '^[0-9]+\\.[0-9]+$'
-        ORDER BY CAST(SUBSTRING_INDEX(nombre, '.', 1) AS UNSIGNED) ASC, 
-                 CAST(SUBSTRING_INDEX(nombre, '.', -1) AS UNSIGNED) ASC
+        ORDER BY id ASC
     ");
     $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    // Fallback si no soporta REGEXP, usar LIKE para buscar patrones numéricos
+    // Fallback si hay error
     try {
         $stmt = $pdo->query("
             SELECT id, nombre, descripcion, COALESCE(uit, 0.00) as uit 
             FROM tipo_pago 
-            WHERE nombre LIKE '%.%' 
-            AND nombre NOT IN ('Depósito', 'Efectivo', 'Plin', 'Transferencia', 'Yape')
-            ORDER BY nombre ASC
+            ORDER BY id ASC
         ");
         $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e2) {
         // Último fallback
-        $stmt = $pdo->query("SELECT id, nombre, descripcion FROM tipo_pago WHERE nombre LIKE '%.%' ORDER BY nombre ASC");
+        $stmt = $pdo->query("SELECT id, nombre, descripcion FROM tipo_pago ORDER BY id ASC");
         $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($lista as &$item) {
             $item['uit'] = 0.00;
@@ -65,26 +125,23 @@ try {
       <table class="min-w-full bg-white border-collapse">
         <thead>
           <tr class="bg-gray-200">
-            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">N°</th>
-            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">CONCEPTO</th>
-            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">UIT</th>
+            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">ID</th>
+            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">DESCRIPCIÓN</th>
             <th class="py-3 px-4 border border-gray-300 text-center font-semibold text-gray-700">ACCIONES</th>
           </tr>
         </thead>
         <tbody>
           <?php foreach ($lista as $index => $item): 
-            $numero = htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8'); // El código como 1.1, 1.2, etc.
-            $concepto = htmlspecialchars($item['descripcion'], ENT_QUOTES, 'UTF-8'); // La descripción completa
-            $uit = isset($item['uit']) && $item['uit'] > 0 ? number_format((float)$item['uit'], 2, '.', '') : number_format(0.00, 2, '.', '');
             $id = (int)$item['id'];
+            $descripcion = htmlspecialchars($item['descripcion'], ENT_QUOTES, 'UTF-8');
+            $uit = isset($item['uit']) && $item['uit'] > 0 ? number_format((float)$item['uit'], 2, '.', '') : number_format(0.00, 2, '.', '');
           ?>
             <tr class="hover:bg-gray-50 border-b border-gray-200">
-              <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $numero ?></td>
-              <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $concepto ?></td>
-              <td class="py-3 px-4 border border-gray-300 text-gray-700 text-right font-medium"><?= $uit ?></td>
+              <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $id ?></td>
+              <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $descripcion ?></td>
               <td class="py-3 px-4 border border-gray-300 text-center">
                 <button 
-                  onclick="abrirModalPago('<?= $numero ?>', '<?= $concepto ?>', <?= $uit ?>, <?= $id ?>)"
+                  onclick="abrirModalPago('<?= $id ?>', '<?= $descripcion ?>', <?= $uit ?>, <?= $id ?>)"
                   class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium">
                   <i class="fas fa-credit-card mr-2"></i> Pagar
                 </button>
@@ -110,9 +167,18 @@ try {
 
           <div class="bg-gray-50 border rounded-2xl p-6 shadow-sm space-y-3">
             <p class="flex justify-between text-gray-700"><span>Concepto</span><span id="modal-concept-name" class="font-medium">—</span></p>
-            <p class="flex justify-between text-gray-700"><span>UIT</span><span id="modal-uit-value" class="font-medium">0.00</span></p>
-            <p class="flex justify-between text-gray-700"><span>Descuento</span><span id="modal-discount-value" class="font-medium">S/ 0.00</span></p>
-            <p class="flex justify-between font-semibold text-gray-800 text-lg border-t pt-3"><span>Total a Pagar</span><span id="modal-total-amount">S/ 0.00</span></p>
+            <p class="flex justify-between text-gray-700"><span>UIT</span><span id="modal-uit-value" class="font-medium">S/ 0.00</span></p>
+            
+            <!-- Sección de Descuentos -->
+            <div id="modal-descuentos-section" class="hidden">
+              <div class="border-t pt-3 mt-3">
+                <p class="text-sm font-semibold text-gray-600 mb-2">Descuentos Aplicables:</p>
+                <div id="modal-descuentos-list" class="space-y-1"></div>
+              </div>
+            </div>
+            
+            <p class="flex justify-between text-gray-700"><span>Descuento Total</span><span id="modal-discount-value" class="font-medium text-green-600">S/ 0.00</span></p>
+            <p class="flex justify-between font-semibold text-gray-800 text-lg border-t pt-3"><span>Total a Pagar</span><span id="modal-total-amount" class="text-blue-600">S/ 0.00</span></p>
           </div>
         </div>
 
@@ -304,17 +370,80 @@ try {
   <script>
     let pagoActual = { numero: '', concepto: '', uit: 0, id: 0 };
 
+    // Filtro de búsqueda
+    document.addEventListener('DOMContentLoaded', function() {
+      const filtroBusqueda = document.getElementById('filtroBusqueda');
+      const btnLimpiar = document.getElementById('btnLimpiarFiltro');
+      const tarjetas = document.querySelectorAll('.concepto-card');
+
+      function filtrarTarjetas() {
+        const texto = filtroBusqueda.value.toLowerCase();
+        tarjetas.forEach(tarjeta => {
+          const textoTarjeta = tarjeta.textContent.toLowerCase();
+          tarjeta.style.display = textoTarjeta.includes(texto) ? '' : 'none';
+        });
+      }
+
+      if (filtroBusqueda) {
+        filtroBusqueda.addEventListener('input', filtrarTarjetas);
+      }
+
+      if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+          filtroBusqueda.value = '';
+          tarjetas.forEach(tarjeta => tarjeta.style.display = '');
+        });
+      }
+    });
+
     function abrirModalPago(numero, concepto, uit, id) {
       pagoActual = { numero, concepto, uit: parseFloat(uit), id: parseInt(id) };
       
       // El monto total es directamente el valor UIT (sin multiplicar)
       const montoTotal = pagoActual.uit;
       
+      // Calcular descuentos
+      const descuentos = <?php echo json_encode($descuentosActivos); ?>;
+      let montoDescuento = 0;
+      let descuentoDetalles = [];
+      
+      if (descuentos && descuentos.length > 0) {
+        // Aplicar el descuento más alto (o sumar si se permite múltiples)
+        const porcentajeDescuento = Math.max(...descuentos.map(d => parseFloat(d.porcentaje_descuento)));
+        montoDescuento = montoTotal * (porcentajeDescuento / 100);
+        
+        // Preparar detalles para mostrar
+        descuentoDetalles = descuentos.map(d => ({
+          resolucion: d.numero_resolucion,
+          titulo: d.titulo,
+          porcentaje: parseFloat(d.porcentaje_descuento),
+          monto: montoTotal * (parseFloat(d.porcentaje_descuento) / 100)
+        }));
+        
+        // Mostrar sección de descuentos
+        const descuentosSection = document.getElementById('modal-descuentos-section');
+        const descuentosList = document.getElementById('modal-descuentos-list');
+        
+        descuentosSection.classList.remove('hidden');
+        descuentosList.innerHTML = descuentoDetalles.map(d => 
+          `<div class="flex justify-between text-sm">
+            <span class="text-gray-600">${d.resolucion} - ${d.titulo} (${d.porcentaje}%)</span>
+            <span class="text-green-600">-S/ ${d.monto.toFixed(2)}</span>
+          </div>`
+        ).join('');
+      } else {
+        // Ocultar sección de descuentos
+        document.getElementById('modal-descuentos-section').classList.add('hidden');
+      }
+      
+      const montoFinal = montoTotal - montoDescuento;
+      
       // Actualizar datos del modal
       document.getElementById('modal-concept-name').textContent = concepto;
-      document.getElementById('modal-uit-value').textContent = pagoActual.uit.toFixed(2);
-      document.getElementById('modal-total-amount').textContent = 'S/ ' + montoTotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      document.getElementById('modal-pay-amount').textContent = 'S/ ' + montoTotal.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('modal-uit-value').textContent = 'S/ ' + montoTotal.toFixed(2);
+      document.getElementById('modal-discount-value').textContent = 'S/ ' + montoDescuento.toFixed(2);
+      document.getElementById('modal-total-amount').textContent = 'S/ ' + montoFinal.toFixed(2);
+      document.getElementById('modal-pay-amount').textContent = 'S/ ' + montoFinal.toFixed(2);
       
       // Limpiar formulario
       document.getElementById('modal-form-pago').reset();
@@ -408,6 +537,16 @@ try {
 
           // El monto es directamente el valor UIT
           const monto = pagoActual.uit;
+          
+          // Calcular descuento
+          const descuentos = <?php echo json_encode($descuentosActivos); ?>;
+          let montoDescuento = 0;
+          
+          if (descuentos && descuentos.length > 0) {
+            const porcentajeDescuento = Math.max(...descuentos.map(d => parseFloat(d.porcentaje_descuento)));
+            montoDescuento = monto * (porcentajeDescuento / 100);
+          }
+          
           if (monto <= 0) {
             mostrarMensaje('El monto debe ser mayor a cero', 'error');
             return;
@@ -434,6 +573,7 @@ try {
               body: JSON.stringify({
                 concepto: pagoActual.concepto,
                 monto: monto,
+                monto_descuento: montoDescuento,
                 metodo_pago: metodoPago.value,
                 tipo_pago_id: pagoActual.id,
                 numero: pagoActual.numero,
