@@ -182,6 +182,52 @@ class BeneficiarioModel {
     }
 
     /**
+     * Obtiene la lista de conceptos de pago con valores UIT
+     * @return array Lista de conceptos de pago
+     */
+    public function listarConceptosPago() {
+        try {
+            // Verificar si existe la columna uit
+            $stmt = $this->db->query("SHOW COLUMNS FROM tipo_pago LIKE 'uit'");
+            $tieneUIT = $stmt->rowCount() > 0;
+            
+            if ($tieneUIT) {
+                $sql = $this->db->prepare("
+                    SELECT 
+                        id,
+                        nombre,
+                        descripcion,
+                        COALESCE(uit, 0.00) AS uit,
+                        CASE 
+                            WHEN uit > 0 THEN 'Activo'
+                            ELSE 'Sin valor'
+                        END AS estado_uit
+                    FROM tipo_pago 
+                    ORDER BY nombre ASC
+                ");
+            } else {
+                $sql = $this->db->prepare("
+                    SELECT 
+                        id,
+                        nombre,
+                        descripcion,
+                        0.00 AS uit,
+                        'Sin configurar' AS estado_uit
+                    FROM tipo_pago 
+                    ORDER BY nombre ASC
+                ");
+            }
+            
+            $sql->execute();
+            return $sql->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("Error en listarConceptosPago: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Obtiene la lista de beneficiarios con información detallada
      * @return array Lista de beneficiarios con sus datos
      */

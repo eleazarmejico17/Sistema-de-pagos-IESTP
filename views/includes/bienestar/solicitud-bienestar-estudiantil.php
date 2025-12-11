@@ -38,13 +38,23 @@ try {
                 s.fecha_solicitud AS fecha,
                 CASE 
                     WHEN s.estado = 'aprobado' THEN 'Aprobado'
+                    WHEN s.estado = 'aprobada' THEN 'Aprobado'
+                    WHEN s.estado = 'Aprobado' THEN 'Aprobado'
+                    WHEN s.estado = 'APROBADO' THEN 'Aprobado'
                     WHEN s.estado = 'rechazado' THEN 'Rechazado'
+                    WHEN s.estado = 'rechazada' THEN 'Rechazado'
+                    WHEN s.estado = 'Rechazado' THEN 'Rechazado'
+                    WHEN s.estado = 'RECHAZADO' THEN 'Rechazado'
                     WHEN s.estado = 'en_evaluacion' THEN 'En evaluación'
+                    WHEN s.estado = 'evaluacion' THEN 'En evaluación'
+                    WHEN s.estado = 'En evaluación' THEN 'En evaluación'
+                    WHEN s.estado = 'EN_EVALUACION' THEN 'En evaluación'
                     ELSE 'Pendiente'
                 END AS estado,
                 s.observaciones AS motivo_respuesta,
                 s.fecha_revision AS fecha_respuesta,
                 s.fecha_solicitud AS fecha_registro,
+                s.estado AS estado_original,
                 '' AS empleado_nombre
             FROM solicitudes s
             LEFT JOIN estudiante e ON e.id = s.estudiante

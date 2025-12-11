@@ -1,24 +1,41 @@
 <?php
 require_once __DIR__ . '/../../../models/bienestar-beneficiariosModel.php';
 $beneficiarioModel = new BeneficiarioModel();
-$beneficiarios = $beneficiarioModel->listarBeneficiarios();
+$conceptosPago = $beneficiarioModel->listarConceptosPago();
+
+// Si no hay conceptos, mostrar datos de ejemplo
+if (empty($conceptosPago)) {
+    $conceptosPago = [
+        ['id' => 1, 'nombre' => '1.1', 'descripcion' => 'Carnet de Medio Pasaje', 'uit' => 18.00, 'estado_uit' => 'Activo'],
+        ['id' => 2, 'nombre' => '1.2', 'descripcion' => 'Duplicado de carnet', 'uit' => 18.00, 'estado_uit' => 'Activo'],
+        ['id' => 3, 'nombre' => '3.1', 'descripcion' => 'Inscripción del postulante modalidad ordinario', 'uit' => 205.00, 'estado_uit' => 'Activo'],
+        ['id' => 4, 'nombre' => '3.2', 'descripcion' => 'Inscripción del postulante modalidad exonerados', 'uit' => 205.00, 'estado_uit' => 'Activo'],
+        ['id' => 5, 'nombre' => '5.1', 'descripcion' => 'Ratificación de matrícula', 'uit' => 172.00, 'estado_uit' => 'Activo'],
+        ['id' => 6, 'nombre' => '5.2', 'descripcion' => 'Matrícula Ingresantes', 'uit' => 220.00, 'estado_uit' => 'Activo'],
+        ['id' => 7, 'nombre' => '6.1', 'descripcion' => 'Trámite de matrícula extemporánea', 'uit' => 8.00, 'estado_uit' => 'Activo'],
+        ['id' => 8, 'nombre' => '7.1', 'descripcion' => 'Convalidación interna por semestre', 'uit' => 61.00, 'estado_uit' => 'Activo']
+    ];
+}
 ?>
 
 <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
   <!-- Header -->
-  <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl shadow-sm">
+  <div class="bg-gradient-to-r from-green-600 to-green-800 text-white px-6 py-5 flex items-center justify-between rounded-t-2xl shadow-sm">
     <div class="flex items-center gap-3">
-      <div class="p-2 bg-blue-500 rounded-lg">
-        <i class="fas fa-user-check text-xl"></i>
+      <div class="p-2 bg-green-500 rounded-lg">
+        <i class="fas fa-credit-card text-xl"></i>
       </div>
       <div>
-        <h2 class="text-xl font-bold">BENEFICIARIOS</h2>
-        <p class="text-blue-100 text-sm">Lista de beneficiarios registrados</p>
+        <h2 class="text-xl font-bold">REALIZAR PAGO</h2>
+        <p class="text-green-100 text-sm">Seleccione los conceptos que desea pagar</p>
       </div>
     </div>
     <div class="flex items-center gap-2">
-      <span class="px-3 py-1 bg-blue-500 bg-opacity-20 rounded-full text-sm font-medium">
-        <?= count($beneficiarios) ?> registros
+      <span class="px-3 py-1 bg-green-500 bg-opacity-20 rounded-full text-sm font-medium">
+        <?= count($conceptosPago) ?> conceptos
+      </span>
+      <span id="totalSeleccionado" class="px-3 py-1 bg-yellow-400 bg-opacity-30 rounded-full text-sm font-medium hidden">
+        Total: S/. 0.00
       </span>
     </div>
   </div>
@@ -33,8 +50,8 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
         <input 
           type="text" 
           id="filtroBusqueda" 
-          placeholder="Buscar por nombre, DNI o programa..." 
-          class="pl-10 pr-4 py-2.5 w-full border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+          placeholder="Buscar por concepto o descripción..." 
+          class="pl-10 pr-4 py-2.5 w-full border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200"
         >
       </div>
       <button 
@@ -43,34 +60,40 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
       >
         <i class="fas fa-sync-alt text-sm"></i> Limpiar
       </button>
+      <button 
+        id="btnSeleccionarTodo" 
+        class="px-4 py-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors flex items-center gap-2 border border-green-200"
+      >
+        <i class="fas fa-check-square text-sm"></i> Seleccionar todo
+      </button>
     </div>
   </div>
 
-  <!-- Tabla de beneficiarios -->
+  <!-- Tabla de conceptos de pago con selección -->
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             <div class="flex items-center gap-1">
-              <span>NOMBRE COMPLETO</span>
-              <button class="text-gray-400 hover:text-gray-600 sortable" data-sort="nombre">
+              <span>N°</span>
+            </div>
+          </th>
+          <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <div class="flex items-center gap-1">
+              <span>CONCEPTO</span>
+              <button class="text-gray-400 hover:text-gray-600 sortable" data-sort="concepto">
                 <i class="fas fa-sort text-xs"></i>
               </button>
             </div>
           </th>
           <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
             <div class="flex items-center gap-1">
-              <span>SOLICITUD</span>
-              <button class="text-gray-400 hover:text-gray-600 sortable" data-sort="programa">
-                <i class="fas fa-sort text-xs"></i>
-              </button>
-            </div>
-          </th>
-          <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-            <div class="flex items-center gap-1">
-              <span>ESTADO</span>
-              <button class="text-gray-400 hover:text-gray-600 sortable" data-sort="ciclo">
+              <span>UIT</span>
+              <button class="text-gray-400 hover:text-gray-600 sortable" data-sort="uit">
                 <i class="fas fa-sort text-xs"></i>
               </button>
             </div>
@@ -80,60 +103,51 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
           </th>
         </tr>
       </thead>
-      <tbody id="tablaBeneficiarios" class="bg-white divide-y divide-gray-100">
-        <?php if (!empty($beneficiarios)): ?>
-          <?php foreach ($beneficiarios as $beneficiario): 
-            $nombreCompleto = trim($beneficiario['nombre'] ?? '');
-            $dni = $beneficiario['dni_est'] ?? '';
-            $programa = $beneficiario['tipo_solicitud'] ?? 'No especificado';
-            $fecha = $beneficiario['fecha'] ?? $beneficiario['fecha_registro'] ?? 'Sin fecha';
-            $estado = $beneficiario['estado'] ?? 'Pendiente';
-            $descripcion = $beneficiario['descripcion'] ?? '';
-            $archivos = $beneficiario['archivos'] ?? '';
-            $telefono = $beneficiario['telefono'] ?? '';
-            if ($estado !== 'Aprobado') { continue; }
-          ?>
-            <tr class="hover:bg-blue-50 transition-colors" 
-                data-nombre="<?= strtolower($nombreCompleto) ?>" 
-                data-dni="<?= htmlspecialchars($dni) ?>" 
-                data-programa="<?= strtolower($programa) ?>"
-                data-ciclo="<?= strtolower($estado) ?>"
-                data-estado="<?= htmlspecialchars($estado) ?>"
-                data-descripcion='<?= htmlspecialchars($descripcion, ENT_QUOTES, "UTF-8") ?>'
-                data-archivos='<?= htmlspecialchars($archivos, ENT_QUOTES, "UTF-8") ?>'
-                data-nombre-completo='<?= htmlspecialchars($nombreCompleto, ENT_QUOTES, "UTF-8") ?>'
-                data-telefono='<?= htmlspecialchars($telefono, ENT_QUOTES, "UTF-8") ?>'
-                data-tipo='<?= htmlspecialchars($programa, ENT_QUOTES, "UTF-8") ?>'
-                data-fecha='<?= htmlspecialchars($fecha, ENT_QUOTES, "UTF-8") ?>'>
+      <tbody id="tablaConceptos" class="bg-white divide-y divide-gray-100">
+        <?php if (!empty($conceptosPago)): ?>
+          <?php foreach ($conceptosPago as $index => $concepto): ?>
+            <tr class="hover:bg-green-50 transition-colors concepto-item" 
+                data-concepto="<?= strtolower($concepto['nombre'] . ' ' . $concepto['descripcion']) ?>" 
+                data-uit="<?= $concepto['uit'] ?>"
+                data-estado="<?= htmlspecialchars($concepto['estado_uit']) ?>"
+                data-id="<?= $concepto['id'] ?>"
+                style="animation-delay: <?= $index * 0.05 ?>s">
               <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <i class="fas fa-user text-blue-600"></i>
-                  </div>
-                  <div>
-                    <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($nombreCompleto) ?></div>
-                    <div class="text-xs text-gray-500"><?= htmlspecialchars($beneficiario['correo'] ?? '') ?></div>
-                  </div>
+                <input type="checkbox" class="concepto-checkbox rounded border-gray-300 text-green-600 focus:ring-green-500" 
+                       value="<?= $concepto['id'] ?>" data-uit="<?= $concepto['uit'] ?>" data-nombre="<?= htmlspecialchars($concepto['nombre']) ?>">
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                <?= $index + 1 ?>
+              </td>
+              <td class="px-6 py-4">
+                <div>
+                  <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($concepto['nombre']) ?></div>
+                  <div class="text-xs text-gray-500"><?= htmlspecialchars($concepto['descripcion']) ?></div>
                 </div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 font-medium"><?= htmlspecialchars($programa) ?></div>
-                <div class="text-xs text-gray-500"><?= date('d/m/Y', strtotime($fecha)) ?></div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-2.5 py-1 text-xs font-medium rounded-full <?= 
-                  $estado === 'Aprobado' ? 'bg-green-100 text-green-800' : 
-                  ($estado === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')
-                ?>">
-                  <?= htmlspecialchars($estado) ?>
-                </span>
+                <div class="flex items-center gap-2">
+                  <span class="text-lg font-bold text-gray-900">
+                    S/. <?= number_format($concepto['uit'], 2, '.', ',') ?>
+                  </span>
+                  <span class="px-2 py-1 text-xs font-medium rounded-full <?= 
+                    $concepto['estado_uit'] === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                  ?>">
+                    <?= htmlspecialchars($concepto['estado_uit']) ?>
+                  </span>
+                </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div class="flex items-center justify-end gap-2">
-                  <button onclick="verDetalle(this)"
-                          class="p-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-colors"
+                  <button onclick="verDetallesConcepto(<?= $concepto['id'] ?>)"
+                          class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Ver detalles">
-                    <i class="fas fa-eye"></i>
+                    <i class="fas fa-info-circle"></i>
+                  </button>
+                  <button onclick="agregarAlCarrito(<?= $concepto['id'] ?>)"
+                          class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          title="Agregar al pago">
+                    <i class="fas fa-shopping-cart"></i>
                   </button>
                 </div>
               </td>
@@ -141,16 +155,46 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
           <?php endforeach; ?>
         <?php else: ?>
           <tr>
-            <td colspan="4" class="px-6 py-12 text-center">
+            <td colspan="5" class="px-6 py-12 text-center">
               <div class="text-gray-400">
-                <i class="fas fa-inbox text-4xl mb-2"></i>
-                <p class="text-sm font-medium text-gray-500">No se encontraron beneficiarios</p>
+                <i class="fas fa-credit-card text-4xl mb-2"></i>
+                <p class="text-sm font-medium text-gray-500">No se encontraron conceptos de pago</p>
+                <p class="text-xs text-gray-400 mt-1">Contacte al administrador para configurar los conceptos</p>
               </div>
             </td>
           </tr>
         <?php endif; ?>
       </tbody>
     </table>
+  </div>
+
+  <!-- Resumen y acciones de pago -->
+  <div id="resumenPago" class="hidden border-t border-gray-200 bg-gray-50 p-6">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex-1">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Resumen del Pago</h3>
+        <div class="space-y-1">
+          <div class="flex justify-between text-sm">
+            <span class="text-gray-600">Conceptos seleccionados:</span>
+            <span id="cantidadConceptos" class="font-medium text-gray-900">0</span>
+          </div>
+          <div class="flex justify-between text-lg font-bold">
+            <span class="text-gray-800">Total a pagar:</span>
+            <span id="totalPagar" class="text-green-600">S/. 0.00</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="cancelarSeleccion()" 
+                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium">
+          <i class="fas fa-times mr-2"></i> Cancelar
+        </button>
+        <button onclick="procesarPago()" 
+                class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium shadow-lg">
+          <i class="fas fa-credit-card mr-2"></i> Procesar Pago
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Paginación -->
@@ -171,7 +215,7 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
           a
           <span class="font-medium">10</span>
           de
-          <span class="font-medium">20</span>
+          <span class="font-medium"><?= count($conceptosPago) ?></span>
           resultados
         </p>
       </div>
@@ -181,8 +225,7 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
             <span class="sr-only">Anterior</span>
             <i class="fas fa-chevron-left h-5 w-5"></i>
           </a>
-          <!-- Current: "z-10 bg-blue-50 border-blue-500 text-blue-600", Default: "bg-white border-gray-300 text-gray-500 hover:bg-gray-50" -->
-          <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+          <a href="#" aria-current="page" class="z-10 bg-green-50 border-green-500 text-green-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
             1
           </a>
           <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
@@ -194,9 +237,6 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
           <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
             ...
           </span>
-          <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-            8
-          </a>
           <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
             <span class="sr-only">Siguiente</span>
             <i class="fas fa-chevron-right h-5 w-5"></i>
@@ -207,127 +247,100 @@ $beneficiarios = $beneficiarioModel->listarBeneficiarios();
   </div>
 </div>
 
-<!-- Modal para ver detalles -->
-<div id="modalDetalle" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-  <div class="relative top-10 mx-auto p-0 border w-11/12 md:w-2/3 lg:w-1/2 shadow-2xl rounded-xl bg-white overflow-hidden">
-    <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold">Detalles del Beneficiario</h3>
-        <button onclick="cerrarModal()" class="text-white hover:text-gray-200">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    </div>
-    <div class="p-6">
-      <div class="space-y-4" id="detalleContenido">
-        <!-- Los detalles se cargarán aquí dinámicamente -->
-      </div>
-    </div>
-    <div class="px-6 py-4 bg-gray-50 text-right border-t">
-      <button onclick="cerrarModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Cerrar
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
+let conceptosSeleccionados = [];
+
 // Funciones JavaScript para la interacción
-function seleccionarBeneficiario(dni) {
-  // Implementar lógica para seleccionar beneficiario
-  console.log('Seleccionado DNI:', dni);
-  alert('Beneficiario con DNI ' + dni + ' seleccionado');
+function verDetallesConcepto(id) {
+  const fila = document.querySelector(`tr[data-id="${id}"]`);
+  const nombre = fila.querySelector('td:nth-child(3) .text-sm').textContent;
+  const descripcion = fila.querySelector('td:nth-child(3) .text-xs').textContent;
+  const uit = fila.querySelector('td:nth-child(4) .text-lg').textContent;
+  
+  alert(`Concepto: ${nombre}\nDescripción: ${descripcion}\nMonto: ${uit}`);
 }
 
-function verDetalle(button) {
-  const fila = button.closest('tr');
-  const dni = fila.dataset.dni || '';
-  const estado = fila.dataset.estado || 'Pendiente';
-  const descripcion = fila.dataset.descripcion || 'Sin descripción';
-  const archivosStr = fila.dataset.archivos || '';
-  const nombreCompleto = fila.dataset.nombreCompleto || '';
-  const telefono = fila.dataset.telefono || '';
-  const tipo = fila.dataset.tipo || '';
-  const fecha = fila.dataset.fecha || '';
+function agregarAlCarrito(id) {
+  const checkbox = document.querySelector(`input[value="${id}"]`);
+  checkbox.checked = true;
+  actualizarSeleccion();
+  
+  // Animación de feedback
+  const button = event.target.closest('button');
+  button.innerHTML = '<i class="fas fa-check text-green-600"></i>';
+  setTimeout(() => {
+    button.innerHTML = '<i class="fas fa-shopping-cart"></i>';
+  }, 1000);
+}
 
-  const archivos = archivosStr
-    .split(',')
-    .map(a => a.trim())
-    .filter(a => a.length > 0);
-
-  document.getElementById('modalDetalle').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-
-  let evidenciasHtml = '';
-  if (archivos.length > 0) {
-    evidenciasHtml = `
-      <div class="pt-4 border-t">
-        <p class="text-sm font-medium text-gray-500 mb-2">Evidencias</p>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          ${archivos.map(archivo => `
-            <a href="../uploads/solicitudes/${archivo}" target="_blank" class="block group">
-              <div class="w-full h-28 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 group-hover:border-blue-400 transition-colors">
-                <img src="../uploads/solicitudes/${archivo}" alt="Evidencia" class="max-h-full max-w-full object-contain" onerror="this.src='https://via.placeholder.com/150?text=Archivo';">
-              </div>
-              <p class="mt-1 text-xs text-gray-500 truncate">${archivo}</p>
-            </a>
-          `).join('')}
-        </div>
-      </div>
-    `;
+function actualizarSeleccion() {
+  const checkboxes = document.querySelectorAll('.concepto-checkbox:checked');
+  conceptosSeleccionados = [];
+  let total = 0;
+  
+  checkboxes.forEach(checkbox => {
+    const id = checkbox.value;
+    const uit = parseFloat(checkbox.dataset.uit);
+    const nombre = checkbox.dataset.nombre;
+    
+    conceptosSeleccionados.push({ id, uit, nombre });
+    total += uit;
+  });
+  
+  // Actualizar UI
+  const totalElement = document.getElementById('totalSeleccionado');
+  const resumenPago = document.getElementById('resumenPago');
+  const totalPagar = document.getElementById('totalPagar');
+  const cantidadConceptos = document.getElementById('cantidadConceptos');
+  
+  if (conceptosSeleccionados.length > 0) {
+    totalElement.classList.remove('hidden');
+    totalElement.textContent = `Total: S/. ${total.toFixed(2)}`;
+    resumenPago.classList.remove('hidden');
+    totalPagar.textContent = `S/. ${total.toFixed(2)}`;
+    cantidadConceptos.textContent = conceptosSeleccionados.length;
+  } else {
+    totalElement.classList.add('hidden');
+    resumenPago.classList.add('hidden');
   }
-
-  document.getElementById('detalleContenido').innerHTML = `
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <p class="text-sm font-medium text-gray-500">DNI del estudiante</p>
-        <p class="mt-1 text-sm text-gray-900">${dni}</p>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-500">Nombre completo</p>
-        <p class="mt-1 text-sm text-gray-900">${nombreCompleto}</p>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-500">Teléfono</p>
-        <p class="mt-1 text-sm text-gray-900">${telefono}</p>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-500">Tipo de solicitud</p>
-        <p class="mt-1 text-sm text-gray-900">${tipo}</p>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-500">Fecha de solicitud</p>
-        <p class="mt-1 text-sm text-gray-900">${fecha}</p>
-      </div>
-      <div>
-        <p class="text-sm font-medium text-gray-500">Estado</p>
-        <p class="mt-1">
-          <span class="px-2.5 py-1 text-xs font-medium rounded-full ${estado === 'Aprobado' ? 'bg-green-100 text-green-800' : (estado === 'Rechazado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')}">
-            ${estado}
-          </span>
-        </p>
-      </div>
-    </div>
-    <div class="pt-4 border-t">
-      <p class="text-sm font-medium text-gray-500">Descripción de la solicitud</p>
-      <p class="mt-1 text-sm text-gray-900 whitespace-pre-line">${descripcion}</p>
-    </div>
-
-    ${evidenciasHtml}
-  `;
+  
+  // Actualizar checkbox principal
+  const selectAll = document.getElementById('selectAll');
+  const allCheckboxes = document.querySelectorAll('.concepto-checkbox');
+  selectAll.checked = checkboxes.length === allCheckboxes.length && allCheckboxes.length > 0;
 }
 
-function cerrarModal() {
-  document.getElementById('modalDetalle').classList.add('hidden');
-  document.body.style.overflow = 'auto';
+function cancelarSeleccion() {
+  document.querySelectorAll('.concepto-checkbox').forEach(cb => cb.checked = false);
+  conceptosSeleccionados = [];
+  actualizarSeleccion();
 }
 
-// Filtro de búsqueda
+function procesarPago() {
+  if (conceptosSeleccionados.length === 0) {
+    alert('Por favor seleccione al menos un concepto para pagar');
+    return;
+  }
+  
+  const total = conceptosSeleccionados.reduce((sum, c) => sum + c.uit, 0);
+  const conceptosNombres = conceptosSeleccionados.map(c => c.nombre).join(', ');
+  
+  if (confirm(`¿Confirmar pago de los siguientes conceptos?\n\n${conceptosNombres}\n\nTotal: S/. ${total.toFixed(2)}`)) {
+    // Aquí iría la lógica para procesar el pago
+    alert('Procesando pago... (Función por implementar)');
+    console.log('Conceptos a pagar:', conceptosSeleccionados);
+  }
+}
+
+// Event listeners
 document.addEventListener('DOMContentLoaded', function() {
   const filtroBusqueda = document.getElementById('filtroBusqueda');
   const btnLimpiar = document.getElementById('btnLimpiarFiltro');
-  const filas = document.querySelectorAll('#tablaBeneficiarios tr');
+  const btnSeleccionarTodo = document.getElementById('btnSeleccionarTodo');
+  const selectAll = document.getElementById('selectAll');
+  const filas = document.querySelectorAll('#tablaConceptos tr.concepto-item');
 
+  // Filtro de búsqueda
   function filtrarTabla() {
     const texto = filtroBusqueda.value.toLowerCase();
     filas.forEach(fila => {
@@ -347,22 +360,54 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Seleccionar todo
+  if (btnSeleccionarTodo) {
+    btnSeleccionarTodo.addEventListener('click', function() {
+      const allCheckboxes = document.querySelectorAll('.concepto-checkbox');
+      const anyUnchecked = Array.from(allCheckboxes).some(cb => !cb.checked);
+      
+      allCheckboxes.forEach(cb => cb.checked = anyUnchecked);
+      actualizarSeleccion();
+    });
+  }
+
+  // Checkbox principal
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      const allCheckboxes = document.querySelectorAll('.concepto-checkbox');
+      allCheckboxes.forEach(cb => cb.checked = this.checked);
+      actualizarSeleccion();
+    });
+  }
+
+  // Checkboxes individuales
+  document.querySelectorAll('.concepto-checkbox').forEach(checkbox => {
+    checkbox.addEventListener('change', actualizarSeleccion);
+  });
+
   // Ordenación de columnas
   document.querySelectorAll('.sortable').forEach(header => {
     header.addEventListener('click', function() {
       const tipo = this.dataset.sort;
-      const tbody = document.querySelector('#tablaBeneficiarios');
-      const filas = Array.from(tbody.querySelectorAll('tr'));
+      const tbody = document.querySelector('#tablaConceptos');
+      const filas = Array.from(tbody.querySelectorAll('tr.concepto-item'));
       
       filas.sort((a, b) => {
-        const aVal = a.querySelector(`td[data-${tipo}]`) ? 
-                    a.querySelector(`td[data-${tipo}]`).dataset[tipo] : 
-                    a.dataset[tipo] || '';
-        const bVal = b.querySelector(`td[data-${tipo}]`) ? 
-                    b.querySelector(`td[data-${tipo}]`).dataset[tipo] : 
-                    b.dataset[tipo] || '';
+        let aVal, bVal;
         
-        return aVal.localeCompare(bVal);
+        if (tipo === 'concepto') {
+          aVal = a.querySelector('td:nth-child(3)').textContent.toLowerCase();
+          bVal = b.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        } else if (tipo === 'uit') {
+          aVal = parseFloat(a.dataset.uit) || 0;
+          bVal = parseFloat(b.dataset.uit) || 0;
+        }
+        
+        if (tipo === 'uit') {
+          return aVal - bVal;
+        } else {
+          return aVal.localeCompare(bVal);
+        }
       });
 
       // Alternar entre orden ascendente y descendente
@@ -370,18 +415,18 @@ document.addEventListener('DOMContentLoaded', function() {
         filas.reverse();
         this.classList.remove('asc');
         this.classList.add('desc');
-        this.querySelector('i').className = 'fas fa-sort-down ml-1';
+        this.querySelector('i').className = 'fas fa-sort-down text-xs';
       } else {
         this.classList.remove('desc');
         this.classList.add('asc');
-        this.querySelector('i').className = 'fas fa-sort-up ml-1';
+        this.querySelector('i').className = 'fas fa-sort-up text-xs';
       }
 
       // Limpiar clases de ordenación de otros encabezados
       document.querySelectorAll('.sortable').forEach(h => {
         if (h !== this) {
           h.classList.remove('asc', 'desc');
-          h.querySelector('i').className = 'fas fa-sort ml-1';
+          h.querySelector('i').className = 'fas fa-sort text-xs';
         }
       });
 
