@@ -8,10 +8,9 @@ $basePath = '..';
 $status = $_GET['status'] ?? null;
 $alerts = [];
 
+// Mostrar mensaje de éxito al registrar resolución y mensaje de error cuando falle
 if ($status === 'resolucion_created') {
-    $alerts[] = ['type' => 'success', 'text' => 'Resolución registrada correctamente.'];
-} elseif ($status === 'beneficiario_created') {
-    $alerts[] = ['type' => 'success', 'text' => 'Beneficiario registrado correctamente.'];
+    $alerts[] = ['type' => 'success', 'text' => 'Resolución registrada exitosamente.'];
 } elseif ($status === 'error') {
     $alerts[] = ['type' => 'error', 'text' => 'Ocurrió un problema al procesar la solicitud.'];
 }
@@ -114,172 +113,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 <?php endif; ?>
 
 <!-- Grid de Formularios -->
-<section class="grid grid-cols-1 xl:grid-cols-2 gap-6 max-w-7xl mx-auto">
-    
-    <!-- Formulario Beneficiario -->
-    <div class="form-card group relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200/50 card-anim">
-        <!-- Header con gradiente mejorado -->
-        <div class="relative bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-6 overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" style="background-size: 200% 100%;"></div>
-            <div class="relative flex items-center gap-4">
-                <div class="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-xl border-2 border-white/30">
-                    <i class="fas fa-user-friends text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h3 class="text-white font-bold text-2xl mb-1">Registrar Beneficiario</h3>
-                    <p class="text-white/90 text-sm font-medium">Agregar nuevo estudiante beneficiario</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario -->
-        <form method="POST" action="dashboard-bienestar.php?pagina=registro-bienestar-estudiantil" id="formBeneficiario" class="p-6 md:p-8 space-y-6 bg-gradient-to-b from-white via-gray-50/50 to-white">
-            <input type="hidden" name="accion" value="agregar_beneficiario">
-            <input type="hidden" name="estudiante_id" id="estudiante_id">
-            
-            <!-- DNI con búsqueda mejorada -->
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                    <i class="fas fa-id-card text-amber-600"></i>
-                    <span>DNI del Estudiante</span>
-                    <span class="text-red-500">*</span>
-                </label>
-                <div class="flex gap-2">
-                    <input 
-                        type="text" 
-                        name="dni" 
-                        id="dni" 
-                        maxlength="8" 
-                        required
-                        value="<?= $oldValue('dni') ?>" 
-                        class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-sm font-medium placeholder-gray-400 shadow-sm hover:border-gray-400" 
-                        placeholder="Ingrese DNI (8 dígitos)">
-                    <button 
-                        type="button" 
-                        id="btnBuscarDNI"
-                        class="px-5 py-3 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 hover:from-blue-600 hover:via-indigo-600 hover:to-blue-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2">
-                        <i class="fas fa-search"></i>
-                        <span class="hidden sm:inline">Buscar</span>
-                    </button>
-                </div>
-                <div id="infoEstudiante" class="mt-3 hidden p-3 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 rounded-xl border-2 border-blue-300/50 shadow-sm">
-                    <div class="flex items-start gap-2">
-                        <i class="fas fa-check-circle text-blue-600 text-lg mt-0.5"></i>
-                        <div class="flex-1">
-                            <p class="text-xs font-bold text-blue-900 mb-1">Estudiante encontrado:</p>
-                            <p class="text-sm text-blue-800 font-semibold" id="nombreEstudiante"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información del estudiante (solo lectura) mejorada -->
-            <div class="grid grid-cols-3 gap-3">
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Programa</label>
-                    <input 
-                        type="text" 
-                        id="programa_estudios" 
-                        readonly
-                        class="w-full px-2 py-2 bg-white border-2 border-gray-200 rounded-lg text-xs font-semibold text-gray-800" 
-                        placeholder="Auto">
-                </div>
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Ciclo</label>
-                    <input 
-                        type="text" 
-                        id="ciclo" 
-                        readonly
-                        class="w-full px-2 py-2 bg-white border-2 border-gray-200 rounded-lg text-xs font-semibold text-gray-800" 
-                        placeholder="Auto">
-                </div>
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-3 border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">Turno</label>
-                    <input 
-                        type="text" 
-                        id="turno" 
-                        readonly
-                        class="w-full px-2 py-2 bg-white border-2 border-gray-200 rounded-lg text-xs font-semibold text-gray-800" 
-                        placeholder="Auto">
-                </div>
-            </div>
-
-            <!-- Resolución mejorada -->
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                    <i class="fas fa-file-contract text-amber-600"></i>
-                    <span>Resolución</span>
-                    <span class="text-red-500">*</span>
-                </label>
-                <select 
-                    name="resolucion_id" 
-                    required
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all appearance-none bg-white text-sm font-medium text-gray-800 cursor-pointer shadow-sm hover:border-gray-400">
-                    <option value="">Seleccionar resolución</option>
-                    <?php foreach ($resoluciones as $res): ?>
-                        <option value="<?= $res['id'] ?>" <?= $oldValue('resolucion_id') == $res['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($res['numero_resolucion'] . ' - ' . $res['titulo'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <!-- Porcentaje de descuento mejorado -->
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                    <i class="fas fa-percent text-amber-600"></i>
-                    <span>Porcentaje de Descuento (%)</span>
-                    <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                    <input 
-                        type="number" 
-                        name="porcentaje_descuento" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        required
-                        value="<?= $oldValue('porcentaje_descuento') ?>" 
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-sm font-medium placeholder-gray-400 shadow-sm hover:border-gray-400" 
-                        placeholder="Ej: 50.00">
-                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <span class="text-gray-400 font-semibold text-sm">%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fechas mejoradas -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Fecha Inicio</label>
-                    <input 
-                        type="date" 
-                        name="fecha_inicio" 
-                        value="<?= $oldValue('fecha_inicio') ?>" 
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-sm font-medium shadow-sm hover:border-gray-400">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Fecha Fin</label>
-                    <input 
-                        type="date" 
-                        name="fecha_fin" 
-                        value="<?= $oldValue('fecha_fin') ?>" 
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all text-sm font-medium shadow-sm hover:border-gray-400">
-                </div>
-            </div>
-
-            <!-- Botón submit mejorado -->
-            <div class="pt-4">
-                <button 
-                    type="submit"
-                    class="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-600 hover:via-orange-600 hover:to-amber-700 text-white font-bold text-base rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] flex items-center justify-center gap-3 group">
-                    <i class="fas fa-user-plus text-lg group-hover:rotate-12 transition-transform"></i>
-                    <span>Agregar Beneficiario</span>
-                    <i class="fas fa-arrow-right text-sm group-hover:translate-x-1 transition-transform"></i>
-                </button>
-            </div>
-        </form>
-    </div>
+<section class="grid grid-cols-1 xl:grid-cols-1 gap-6 max-w-4xl mx-auto">
 
     <!-- Formulario Resolución -->
     <div class="form-card group relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200/50 card-anim">
@@ -333,9 +167,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
                     placeholder="Título de la resolución">
             </div>
 
-            <!-- Fechas mejoradas -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+            <!-- Fechas y monto de descuento -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-1">
                     <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <i class="fas fa-calendar-alt text-blue-600"></i>
                         <span>Fecha Resolución</span>
@@ -348,17 +182,35 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
                         value="<?= $oldValue('fecha_inicio') ?>" 
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium shadow-sm hover:border-gray-400">
                 </div>
-                <div>
+                <div class="md:col-span-1">
                     <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <i class="fas fa-calendar-times text-blue-600"></i>
                         <span>Fecha Fin</span>
-                        <span class="text-sm text-gray-500 font-normal">(Opcional)</span>
                     </label>
                     <input 
                         type="date" 
                         name="fecha_fin" 
                         value="<?= $oldValue('fecha_fin') ?>" 
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium shadow-sm hover:border-gray-400">
+                </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                        <i class="fas fa-money-bill-wave text-blue-600"></i>
+                        <span>Monto de Descuento</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="number" 
+                            name="monto_descuento" 
+                            step="0.01" 
+                            min="0" 
+                            value="<?= $oldValue('monto_descuento') ?>" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm font-medium placeholder-gray-400 shadow-sm hover:border-gray-400" 
+                            placeholder="Ej: 150.00">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                            <span class="text-gray-400 font-semibold text-sm">S/</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

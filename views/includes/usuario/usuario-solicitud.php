@@ -103,19 +103,16 @@
 
             <div class="flex flex-col gap-2">
               <label class="font-medium text-gray-700 flex items-center gap-2">
-                <i class="fas fa-list text-yellow-500"></i> Tipo de solicitud
+                <i class="fas fa-file-contract text-yellow-500"></i> Resolución
               </label>
               <select 
                 name="tipo"
                 id="tipo"
                 class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-yellow-400 focus:outline-none transition"
                 required>
-                <option value="">Seleccionar tipo</option>
-                <option value="Deportista">Deportista</option>
-                <option value="Académica">Académica</option>
-                <option value="Bienestar general">Bienestar general</option>
-                <option value="Otro">Otro</option>
+                <option value="">Seleccionar resolución</option>
               </select>
+              <p class="text-xs text-gray-500">Selecciona la resolución institucional a la que se asocia tu solicitud.</p>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -268,7 +265,7 @@ document.getElementById("formSolicitud").addEventListener("submit", function(e) 
 
   if (!/^9\d{8}$/.test(telefono)) errores.push("Teléfono inválido");
 
-  if (!tipo) errores.push("Seleccione un tipo de solicitud");
+  if (!tipo) errores.push("Seleccione una resolución");
 
   const hoy = new Date().toISOString().split("T")[0];
   if (fecha > hoy) errores.push("Fecha no válida");
@@ -408,6 +405,49 @@ function buscarEstudiantePorDNI(dni) {
 // FECHA HOY AUTOMÁTICA
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("fecha").value = new Date().toISOString().split("T")[0];
+
+  // Cargar resoluciones en el select de tipo (Resolución)
+  const selectResolucion = document.getElementById("tipo");
+  if (selectResolucion) {
+    const currentPath = window.location.pathname;
+    let apiPath;
+
+    if (currentPath.includes('/views/')) {
+      // Estamos dentro de views/ (por ejemplo, dashboard-usuario)
+      apiPath = '../controller/listarResolucionesPublic.php';
+    } else {
+      // Ruta alternativa
+      apiPath = '../../controller/listarResolucionesPublic.php';
+    }
+
+    fetch(apiPath)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.success || !Array.isArray(data.data)) return;
+
+        // Limpiar excepto la primera opción
+        const firstOption = selectResolucion.querySelector('option');
+        selectResolucion.innerHTML = '';
+        if (firstOption) {
+          selectResolucion.appendChild(firstOption);
+        } else {
+          const opt = document.createElement('option');
+          opt.value = '';
+          opt.textContent = 'Seleccionar resolución';
+          selectResolucion.appendChild(opt);
+        }
+
+        data.data.forEach(res => {
+          const opt = document.createElement('option');
+          opt.value = res.id; // enviamos el id de la resolución
+          opt.textContent = `${res.numero_resolucion} - ${res.titulo}`;
+          selectResolucion.appendChild(opt);
+        });
+      })
+      .catch(err => {
+        console.error('Error cargando resoluciones:', err);
+      });
+  }
 });
 </script>
 

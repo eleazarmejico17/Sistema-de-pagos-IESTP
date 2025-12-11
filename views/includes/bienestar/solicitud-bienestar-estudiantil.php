@@ -15,34 +15,40 @@ try {
         throw new Exception("No se encontró la clase de conexión");
     }
 
-    // Primero verificar que la tabla existe y tiene datos
-    $checkTable = $db->query("SHOW TABLES LIKE 'solicitud'");
+    // Primero verificar que la tabla 'solicitudes' existe
+    $checkTable = $db->query("SHOW TABLES LIKE 'solicitudes'");
     if ($checkTable->rowCount() === 0) {
-        throw new Exception("La tabla 'solicitud' no existe en la base de datos");
+        throw new Exception("La tabla 'solicitudes' no existe en la base de datos");
     }
 
     // Contar total de solicitudes
-    $countStmt = $db->query("SELECT COUNT(*) as total FROM solicitud");
+    $countStmt = $db->query("SELECT COUNT(*) as total FROM solicitudes");
     $totalSolicitudes = $countStmt->fetch(PDO::FETCH_ASSOC)['total'];
 
     // Obtener todas las solicitudes con información completa
+    // Usamos la estructura real: solicitudes + estudiante
     $sql = "SELECT 
                 s.id,
-                s.nombre,
-                s.telefono,
-                s.correo,
+                CONCAT(e.ap_est, ' ', e.am_est, ' ', e.nom_est) AS nombre,
+                e.cel_est AS telefono,
+                e.mailp_est AS correo,
                 s.tipo_solicitud,
                 s.descripcion,
-                s.archivos,
-                s.fecha,
-                COALESCE(s.estado, 'Pendiente') AS estado,
-                s.motivo_respuesta,
-                s.fecha_respuesta,
-                s.fecha_registro,
-                COALESCE(e.apnom_emp, '') AS empleado_nombre
-            FROM solicitud s
-            LEFT JOIN empleado e ON e.id = s.empleado_id
-            ORDER BY COALESCE(s.fecha_registro, s.fecha, NOW()) DESC";
+                s.foto AS archivos,
+                s.fecha_solicitud AS fecha,
+                CASE 
+                    WHEN s.estado = 'aprobado' THEN 'Aprobado'
+                    WHEN s.estado = 'rechazado' THEN 'Rechazado'
+                    WHEN s.estado = 'en_evaluacion' THEN 'En evaluación'
+                    ELSE 'Pendiente'
+                END AS estado,
+                s.observaciones AS motivo_respuesta,
+                s.fecha_revision AS fecha_respuesta,
+                s.fecha_solicitud AS fecha_registro,
+                '' AS empleado_nombre
+            FROM solicitudes s
+            LEFT JOIN estudiante e ON e.id = s.estudiante
+            ORDER BY COALESCE(s.fecha_revision, s.fecha_solicitud, NOW()) DESC";
     
     $stmt = $db->prepare($sql);
     $stmt->execute();

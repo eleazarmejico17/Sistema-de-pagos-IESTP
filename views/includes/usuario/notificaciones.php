@@ -7,26 +7,31 @@ $errorConsulta = null;
 try {
     $db = Conexion::getInstance()->getConnection();
     
-    // Obtener notificaciones de la tabla solicitud que estén aprobadas o rechazadas
-    // y que tengan notificacion_enviada = 1 o fecha_respuesta no nula
+    // Obtener notificaciones desde la tabla 'solicitudes' (plural)
+    // Solo solicitudes aprobadas o rechazadas
     $sql = "SELECT 
                 s.id,
-                s.nombre,
-                s.telefono,
-                s.correo,
+                CONCAT(e.ap_est, ' ', e.am_est, ' ', e.nom_est) AS nombre,
+                e.cel_est AS telefono,
+                e.mailp_est AS correo,
                 s.tipo_solicitud,
                 s.descripcion,
-                s.archivos,
-                s.fecha,
-                COALESCE(s.estado, 'Pendiente') AS estado,
-                s.motivo_respuesta,
-                s.fecha_respuesta,
-                s.fecha_registro,
-                COALESCE(s.notificacion_enviada, 0) AS notificacion_enviada
-            FROM solicitud s
-            WHERE s.estado IN ('Aprobado', 'Rechazado')
-            AND (s.notificacion_enviada = 1 OR s.fecha_respuesta IS NOT NULL)
-            ORDER BY COALESCE(s.fecha_respuesta, s.fecha_registro, s.fecha, NOW()) DESC
+                s.foto AS archivos,
+                s.fecha_solicitud AS fecha,
+                CASE 
+                    WHEN s.estado = 'aprobado' THEN 'Aprobado'
+                    WHEN s.estado = 'rechazado' THEN 'Rechazado'
+                    WHEN s.estado = 'en_evaluacion' THEN 'En evaluación'
+                    ELSE 'Pendiente'
+                END AS estado,
+                s.observaciones AS motivo_respuesta,
+                s.fecha_revision AS fecha_respuesta,
+                s.fecha_solicitud AS fecha_registro,
+                1 AS notificacion_enviada
+            FROM solicitudes s
+            LEFT JOIN estudiante e ON e.id = s.estudiante
+            WHERE s.estado IN ('aprobado', 'rechazado')
+            ORDER BY COALESCE(s.fecha_revision, s.fecha_solicitud, NOW()) DESC
             LIMIT 50";
     
     $stmt = $db->prepare($sql);

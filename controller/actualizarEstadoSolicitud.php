@@ -26,8 +26,8 @@ try {
     // ✅ CONEXIÓN CORRECTA
     $db = Conexion::getInstance()->getConnection();
 
-    // VALIDAMOS ID
-    $check = $db->prepare("SELECT id FROM solicitud WHERE id = :id");
+    // VALIDAMOS ID en tabla 'solicitudes'
+    $check = $db->prepare("SELECT id FROM solicitudes WHERE id = :id");
     $check->execute([':id' => $id]);
     if ($check->rowCount() === 0) {
         throw new Exception("Solicitud no encontrada");
@@ -49,12 +49,11 @@ try {
         }
     }
 
-    // CONSTRUIR CAMPOS
+    // CONSTRUIR CAMPOS para tabla 'solicitudes'
     $set = [
         'estado = :estado',
-        'motivo_respuesta = :motivo',
-        'fecha_respuesta = NOW()',
-        'notificacion_enviada = 1'
+        'observaciones = :motivo',
+        'fecha_revision = NOW()'
     ];
 
     $params = [
@@ -64,12 +63,12 @@ try {
     ];
 
     if ($empleadoId !== null) {
-        $set[] = 'empleado_id = :empleado_id';
+        $set[] = 'empleado = :empleado_id';
         $params[':empleado_id'] = $empleadoId;
     }
 
-    // ACTUALIZAR
-    $sql = "UPDATE solicitud SET " . implode(', ', $set) . " WHERE id = :id";
+    // ACTUALIZAR en tabla 'solicitudes'
+    $sql = "UPDATE solicitudes SET " . implode(', ', $set) . " WHERE id = :id";
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
 
@@ -88,57 +87,7 @@ try {
         ]);
     }
 
-    // CREAR TABLA NOTIFICACIONES SI NO EXISTE
-    $db->exec("
-        CREATE TABLE IF NOT EXISTS notificaciones (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            solicitud_id INT NOT NULL,
-            usuario_id INT,
-            mensaje TEXT NOT NULL,
-            tipo ENUM('Aprobado','Rechazado','Aviso') DEFAULT 'Aviso',
-            leido TINYINT(1) DEFAULT 0,
-            creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ");
-
-    // OBTENER SOLICITUD
-    $stmt = $db->prepare("SELECT correo FROM solicitud WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-    $sol = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if ($sol && !empty($sol['correo'])) {
-        // BUSCAR ESTUDIANTE
-        $stmt = $db->prepare("
-            SELECT u.id FROM usuarios u
-            INNER JOIN roles r ON r.id = u.rol_id
-            WHERE u.correo = :correo AND r.nombre = 'usuario'
-            LIMIT 1
-        ");
-        $stmt->execute([':correo' => $sol['correo']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($user) {
-            $mensaje = "Su solicitud ha sido " . strtolower($estado);
-            if ($estado === 'Rechazado' && $motivo) {
-                $mensaje .= ". Motivo: " . $motivo;
-            }
-
-            $tipo = $estado === 'Aprobado' ? 'Aprobado' : 'Rechazado';
-
-            $stmt = $db->prepare("
-                INSERT INTO notificaciones 
-                (solicitud_id, usuario_id, mensaje, tipo)
-                VALUES (:sid, :uid, :msg, :tipo)
-            ");
-
-            $stmt->execute([
-                ':sid'  => $id,
-                ':uid'  => $user['id'],
-                ':msg'  => $mensaje,
-                ':tipo' => $tipo
-            ]);
-        }
-    }
+    // Nota: se omite lógica de notificaciones por correo/tabla 'notificaciones'
 
     echo json_encode([
         "success" => true,
