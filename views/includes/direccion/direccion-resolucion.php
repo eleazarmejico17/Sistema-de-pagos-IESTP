@@ -34,12 +34,9 @@ try {
                 est.dni_est,
                 CONCAT(COALESCE(est.nom_est, ''), ' ', COALESCE(est.ap_est, ''), ' ', COALESCE(est.am_est, '')) AS nombre_completo_est,
                 COALESCE(prog.nom_progest, 'No especificada') AS carrera
-            FROM solicitud s
+            FROM solicitudes s
             LEFT JOIN empleado e ON e.id = s.empleado_id
-            LEFT JOIN estudiante est ON (
-                (est.mailp_est = s.correo AND est.mailp_est != '' AND est.mailp_est IS NOT NULL)
-                OR (est.maili_est = s.correo AND est.maili_est != '' AND est.maili_est IS NOT NULL)
-            )
+            LEFT JOIN estudiante est ON est.id = s.estudiante
             LEFT JOIN matricula m ON m.estudiante = est.id AND (m.est_matricula = '1' OR m.est_matricula IS NULL)
             LEFT JOIN prog_estudios prog ON prog.id = m.prog_estudios
             WHERE s.estado IN ('Aprobado', 'Pendiente')

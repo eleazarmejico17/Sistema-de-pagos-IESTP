@@ -67,6 +67,10 @@ if ($estudianteIdActual) {
     $descuentosActivos = obtenerDescuentosActivos($pdo, $estudianteIdActual);
 }
 
+// DEBUG: Agregar información de depuración
+echo "<!-- DEBUG: ID Estudiante: " . ($estudianteIdActual ?? 'NULL') . " -->";
+echo "<!-- DEBUG: Descuentos Activos: " . print_r($descuentosActivos, true) . " -->";
+
 // Verificar y agregar campo UIT si no existe
 try {
     $stmt = $pdo->query("SHOW COLUMNS FROM tipo_pago LIKE 'uit'");
@@ -127,6 +131,7 @@ try {
           <tr class="bg-gray-200">
             <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">ID</th>
             <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">DESCRIPCIÓN</th>
+            <th class="py-3 px-4 border border-gray-300 text-left font-semibold text-gray-700">UIT</th>
             <th class="py-3 px-4 border border-gray-300 text-center font-semibold text-gray-700">ACCIONES</th>
           </tr>
         </thead>
@@ -139,6 +144,7 @@ try {
             <tr class="hover:bg-gray-50 border-b border-gray-200">
               <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $id ?></td>
               <td class="py-3 px-4 border border-gray-300 text-gray-700"><?= $descripcion ?></td>
+              <td class="py-3 px-4 border border-gray-300 text-gray-700">S/ <?= $uit ?></td>
               <td class="py-3 px-4 border border-gray-300 text-center">
                 <button 
                   onclick="abrirModalPago('<?= $id ?>', '<?= $descripcion ?>', <?= $uit ?>, <?= $id ?>)"
@@ -408,9 +414,15 @@ try {
       let descuentoDetalles = [];
       
       if (descuentos && descuentos.length > 0) {
+        console.log('Descuentos encontrados:', descuentos);
+        
         // Aplicar el descuento más alto (o sumar si se permite múltiples)
         const porcentajeDescuento = Math.max(...descuentos.map(d => parseFloat(d.porcentaje_descuento)));
         montoDescuento = montoTotal * (porcentajeDescuento / 100);
+        
+        console.log('Porcentaje descuento:', porcentajeDescuento);
+        console.log('Monto total:', montoTotal);
+        console.log('Monto descuento:', montoDescuento);
         
         // Preparar detalles para mostrar
         descuentoDetalles = descuentos.map(d => ({

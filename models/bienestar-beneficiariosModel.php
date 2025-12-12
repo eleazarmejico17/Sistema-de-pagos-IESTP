@@ -269,29 +269,29 @@ class BeneficiarioModel {
             $sql = $this->db->prepare("
                 SELECT 
                     s.id,
-                    s.nombre,
-                    s.telefono,
-                    s.correo,
+                    CONCAT(e.ap_est, ' ', e.am_est, ' ', e.nom_est) AS nombre,
+                    e.cel_est AS telefono,
+                    e.mailp_est AS correo,
                     s.tipo_solicitud,
                     s.descripcion,
-                    s.archivos,
-                    s.fecha,
+                    s.foto AS archivos,
+                    s.fecha_solicitud AS fecha,
                     COALESCE(s.estado, 'Pendiente') AS estado,
-                    s.motivo_respuesta,
-                    s.fecha_respuesta,
-                    s.fecha_registro,
+                    s.observaciones AS motivo_respuesta,
+                    s.fecha_revision AS fecha_respuesta,
+                    s.fecha_solicitud AS fecha_registro,
                     COALESCE(emp.apnom_emp, '') AS empleado_nombre,
-                    est.dni_est,
+                    e.dni_est,
                     m.per_acad AS ciclo,
                     pe.nom_progest AS programa_nombre
-                FROM solicitud s
-                LEFT JOIN empleado emp ON emp.id = s.empleado_id
-                LEFT JOIN estudiante est ON est.id = s.estudiante_id
-                LEFT JOIN matricula m ON m.estudiante = est.id
+                FROM solicitudes s
+                LEFT JOIN empleado emp ON emp.id = s.empleado
+                LEFT JOIN estudiante e ON e.id = s.estudiante
+                LEFT JOIN matricula m ON m.estudiante = e.id
                 LEFT JOIN prog_estudios pe ON pe.id = m.prog_estudios
                 WHERE LOWER(TRIM(COALESCE(s.estado, 'Pendiente'))) IN 
                     ('aprobado', 'aprobada', 'approved', 'aprobados', 'aprobadas', 'accept', 'aceptado', 'aceptada', 'aceptados', 'aceptadas')
-                ORDER BY COALESCE(s.fecha_respuesta, s.fecha, NOW()) DESC
+                ORDER BY COALESCE(s.fecha_revision, s.fecha_solicitud, NOW()) DESC
             ");
             $sql->execute();
             $resultados = $sql->fetchAll(PDO::FETCH_ASSOC);

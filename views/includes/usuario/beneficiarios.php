@@ -11,8 +11,9 @@ if (!empty($solicitudesAprobadas)) {
 
 // Verificar directamente en BD para diagnóstico
 try {
-    $conn = new PDO("mysql:host=localhost;dbname=sistema_pagos", "root", "");
-    $sql = "SELECT id, nombre, estado FROM solicitud WHERE estado LIKE '%apro%' OR estado LIKE '%Apro%' LIMIT 5";
+    require_once __DIR__ . '/../../../config/conexion.php';
+    $conn = Conexion::getInstance()->getConnection();
+    $sql = "SELECT id, nombre, estado FROM solicitudes WHERE estado LIKE '%apro%' OR estado LIKE '%Apro%' LIMIT 5";
     $stmt = $conn->prepare($sql);
     $stmt->execute();
     $directas = $stmt->fetchAll(PDO::FETCH_ASSOC);
