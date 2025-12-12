@@ -118,6 +118,11 @@ switch($pagina){
         $icono  = 'fa-file-alt';
         break;
 
+    case 'notificaciones-bienestar':
+        $titulo = 'NOTIFICACIONES';
+        $icono  = 'fa-bell';
+        break;
+
     default:
         $titulo = 'INICIO';
         $icono  = 'fa-home';
@@ -213,6 +218,11 @@ function activo($id, $pagina){
             <button onclick="window.location='?pagina=solicitud-bienestar-estudiantil'"
                 class="flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold <?= activo('solicitud-bienestar-estudiantil', $pagina) ?>">
                 <i class="fas fa-file-alt text-xl"></i> SOLICITUDES
+            </button>
+
+            <button onclick="window.location='?pagina=notificaciones-bienestar'"
+                class="flex items-center gap-4 px-5 py-3 rounded-2xl font-semibold <?= activo('notificaciones-bienestar', $pagina) ?>">
+                <i class="fas fa-bell text-xl"></i> NOTIFICACIONES
             </button>
 
         </nav>

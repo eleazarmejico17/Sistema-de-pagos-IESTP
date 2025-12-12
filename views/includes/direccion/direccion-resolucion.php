@@ -19,28 +19,28 @@ try {
     // Incluimos las que están aprobadas por bienestar o pendientes
     $sql = "SELECT 
                 s.id,
-                s.nombre,
-                s.telefono,
-                s.correo,
+                CONCAT(COALESCE(est.nom_est, ''), ' ', COALESCE(est.ap_est, ''), ' ', COALESCE(est.am_est, '')) AS nombre,
+                est.cel_est AS telefono,
+                est.mailp_est AS correo,
                 s.tipo_solicitud,
                 s.descripcion,
-                s.archivos,
-                s.fecha,
+                s.foto AS archivos,
+                s.fecha_solicitud AS fecha,
                 COALESCE(s.estado, 'Pendiente') AS estado,
-                s.motivo_respuesta,
-                s.fecha_respuesta,
-                s.fecha_registro,
+                s.observaciones AS motivo_respuesta,
+                s.fecha_revision AS fecha_respuesta,
+                s.fecha_solicitud AS fecha_registro,
                 COALESCE(e.apnom_emp, '') AS empleado_nombre,
                 est.dni_est,
                 CONCAT(COALESCE(est.nom_est, ''), ' ', COALESCE(est.ap_est, ''), ' ', COALESCE(est.am_est, '')) AS nombre_completo_est,
                 COALESCE(prog.nom_progest, 'No especificada') AS carrera
             FROM solicitudes s
-            LEFT JOIN empleado e ON e.id = s.empleado_id
+            LEFT JOIN empleado e ON e.id = s.empleado
             LEFT JOIN estudiante est ON est.id = s.estudiante
             LEFT JOIN matricula m ON m.estudiante = est.id AND (m.est_matricula = '1' OR m.est_matricula IS NULL)
             LEFT JOIN prog_estudios prog ON prog.id = m.prog_estudios
-            WHERE s.estado IN ('Aprobado', 'Pendiente')
-            ORDER BY COALESCE(s.fecha_registro, s.fecha, NOW()) DESC";
+            WHERE s.estado IN ('aprobado', 'pendiente')
+            ORDER BY COALESCE(s.fecha_revision, s.fecha_solicitud, NOW()) DESC";
     
     $stmt = $db->prepare($sql);
     $stmt->execute();
@@ -161,16 +161,71 @@ try {
             <span class="text-blue-700 font-bold">▼</span>
           </button>
           <div class="accordion-content p-5 border-t border-gray-200 bg-white space-y-4">
-            <p class="font-semibold text-gray-700">Bienestar Estudiantil</p>
-            <p class="text-gray-600 text-sm">
-              Hola <?= $nombreCompleto ?>, tu solicitud ha sido <?= $estadoTexto ?>.
-            </p>
+            <!-- Información del Estudiante -->
+            <div class="bg-gray-50 rounded-lg p-4">
+              <p class="font-semibold text-gray-700 mb-2">Información del Estudiante</p>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-gray-600">Nombre:</span>
+                  <span class="font-medium ml-2"><?= $nombreCompleto ?></span>
+                </div>
+                <div>
+                  <span class="text-gray-600">DNI:</span>
+                  <span class="font-medium ml-2"><?= $dni ?></span>
+                </div>
+                <div>
+                  <span class="text-gray-600">Carrera:</span>
+                  <span class="font-medium ml-2"><?= $carrera ?></span>
+                </div>
+                <div>
+                  <span class="text-gray-600">Estado:</span>
+                  <span class="inline-block <?= $estadoTexto === 'aprobado' ? 'bg-green-300 text-green-900' : ($estadoTexto === 'rechazado' ? 'bg-red-300 text-red-900' : 'bg-yellow-300 text-yellow-900') ?> text-xs font-semibold px-3 py-1 rounded ml-2">
+                    <?= $estadoTexto ?>
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            <div>
-              <p class="font-semibold text-gray-700 text-sm mb-2">Resolución solicitada</p>
-              <span class="inline-block <?= $estadoTexto === 'aprobado' ? 'bg-green-300 text-green-900' : ($estadoTexto === 'rechazado' ? 'bg-red-300 text-red-900' : 'bg-yellow-300 text-yellow-900') ?> text-xs font-semibold px-3 py-1 rounded">
-                <?= $resolucion ?>
-              </span>
+            <!-- Detalles de la Resolución -->
+            <div class="bg-blue-50 rounded-lg p-4">
+              <p class="font-semibold text-gray-700 mb-3">Detalles de la Resolución</p>
+              <div class="space-y-3">
+                <div>
+                  <label class="text-sm text-gray-600 font-medium">N° Resolución:</label>
+                  <div class="mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm">
+                    <?= htmlspecialchars($sol['tipo_solicitud'] ?? 'Pendiente', ENT_QUOTES, 'UTF-8') ?>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="text-sm text-gray-600 font-medium">Título:</label>
+                  <div class="mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm">
+                    <?= htmlspecialchars($sol['descripcion'] ?? 'Sin título', ENT_QUOTES, 'UTF-8') ?>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-sm text-gray-600 font-medium">Descripción / Observaciones:</label>
+                  <div class="mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm min-h-[60px]">
+                    <?= htmlspecialchars($sol['descripcion'] ?? 'Sin descripción', ENT_QUOTES, 'UTF-8') ?>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="text-sm text-gray-600 font-medium">Fecha Solicitud:</label>
+                    <div class="mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm">
+                      <?= date('d/m/Y', strtotime($sol['fecha'] ?? 'now')) ?>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-sm text-gray-600 font-medium">Fecha Revisión:</label>
+                    <div class="mt-1 px-3 py-2 bg-white border border-gray-300 rounded-md text-sm">
+                      <?= $sol['fecha_respuesta'] ? date('d/m/Y', strtotime($sol['fecha_respuesta'])) : 'Pendiente' ?>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <?php 
