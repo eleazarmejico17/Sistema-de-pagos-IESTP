@@ -80,11 +80,11 @@ try {
 
     // Obtener actividad mensual de solicitudes
     $sqlActividad = "SELECT 
-                        DATE_FORMAT(COALESCE(fecha_registro, fecha, NOW()), '%Y-%m') as mes,
+                        DATE_FORMAT(fecha_solicitud, '%Y-%m') as mes,
                         COUNT(*) as total
-                    FROM solicitud
-                    WHERE COALESCE(fecha_registro, fecha, NOW()) >= DATE_SUB(NOW(), INTERVAL 7 MONTH)
-                    GROUP BY DATE_FORMAT(COALESCE(fecha_registro, fecha, NOW()), '%Y-%m')
+                    FROM solicitudes
+                    WHERE fecha_solicitud >= DATE_SUB(NOW(), INTERVAL 7 MONTH)
+                    GROUP BY DATE_FORMAT(fecha_solicitud, '%Y-%m')
                     ORDER BY mes ASC";
     
     $stmt = $db->prepare($sqlActividad);

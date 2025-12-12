@@ -1542,7 +1542,7 @@ INSERT INTO `usuarios` (`id`, `usuario`, `password`, `tipo`, `estuempleado`, `to
 (3, 'admin@gmail.com', '$2y$10$X2IMZYqSEbSJ1wOdG1LcOeA/rXHjRAIivFYb.wAye0o5CZTRcPuIe', 2, 12555414, '444');
 
 -- ============================================================
--- RESOLUCIONES (20)
+-- RESOLUCIONES (5)
 -- ============================================================
 
 INSERT INTO resoluciones (
@@ -1550,26 +1550,10 @@ INSERT INTO resoluciones (
     monto_descuento, ruta_documento, fecha_inicio,
     fecha_fin, creado_por, creado_en
 ) VALUES
-('RES-001','Descuento Hermano','Texto...',50,'res1.pdf','2025-01-01','2025-12-31',1,NOW()),
+('RES-001','Deportista','Texto...',50,'res1.pdf','2025-01-01','2025-12-31',1,NOW()),
 ('RES-002','Excelencia Académica','Texto...',40,'res2.pdf','2025-01-01','2025-12-31',2,NOW()),
-('RES-003','Deporte','Texto...',30,'res3.pdf','2025-01-01','2025-12-31',3,NOW()),
-('RES-004','Arte','Texto...',25,'res4.pdf','2025-01-01','2025-12-31',4,NOW()),
-('RES-005','Cultura','Texto...',20,'res5.pdf','2025-01-01','2025-12-31',5,NOW()),
-('RES-006','Apoyo Social','Texto...',35,'res6.pdf','2025-01-01','2025-12-31',6,NOW()),
-('RES-007','Provincia','Texto...',15,'res7.pdf','2025-01-01','2025-12-31',7,NOW()),
-('RES-008','Investigación','Texto...',30,'res8.pdf','2025-01-01','2025-12-31',8,NOW()),
-('RES-009','Voluntariado','Texto...',10,'res9.pdf','2025-01-01','2025-12-31',9,NOW()),
-('RES-010','Reconocimiento','Texto...',5,'res10.pdf','2025-01-01','2025-12-31',10,NOW()),
-('RES-011','Beca Completa','Texto...',100,'res11.pdf','2025-01-01','2025-12-31',11,NOW()),
-('RES-012','Media Beca','Texto...',50,'res12.pdf','2025-01-01','2025-12-31',12,NOW()),
-('RES-013','Descuento Especial','Texto...',18,'res13.pdf','2025-01-01','2025-12-31',13,NOW()),
-('RES-014','Descuento ITS','Texto...',12,'res14.pdf','2025-01-01','2025-12-31',14,NOW()),
-('RES-015','Descuento Temporada','Texto...',27,'res15.pdf','2025-01-01','2025-12-31',15,NOW()),
-('RES-016','Promo 1','Texto...',22,'res16.pdf','2025-01-01','2025-12-31',16,NOW()),
-('RES-017','Promo 2','Texto...',17,'res17.pdf','2025-01-01','2025-12-31',17,NOW()),
-('RES-018','Promo 3','Texto...',42,'res18.pdf','2025-01-01','2025-12-31',18,NOW()),
-('RES-019','Promo 4','Texto...',31,'res19.pdf','2025-01-01','2025-12-31',19,NOW()),
-('RES-020','Promo 5','Texto...',29,'res20.pdf','2025-01-01','2025-12-31',20,NOW());
+('RES-003','Actividad','Texto...',30,'res3.pdf','2025-01-01','2025-12-31',3,NOW()),
+('otros','Otros','Texto...',25,'res4.pdf','2025-01-01','2025-12-31',4,NOW());
 
 -- ============================================================
 -- SOLICITUDES (20)
@@ -1584,22 +1568,22 @@ INSERT INTO solicitudes (
 (2,2,'Descuento','Solicitud 2','pendiente',NOW(),NULL,2,NULL,NULL),
 (3,3,'Descuento','Solicitud 3','pendiente',NOW(),NULL,3,NULL,NULL),
 (4,4,'Descuento','Solicitud 4','pendiente',NOW(),NULL,4,NULL,NULL),
-(5,5,'Descuento','Solicitud 5','pendiente',NOW(),NULL,5,NULL,NULL),
-(6,6,'Descuento','Solicitud 6','pendiente',NOW(),NULL,6,NULL,NULL),
-(7,7,'Descuento','Solicitud 7','pendiente',NOW(),NULL,7,NULL,NULL),
-(8,8,'Descuento','Solicitud 8','pendiente',NOW(),NULL,8,NULL,NULL),
-(9,9,'Descuento','Solicitud 9','pendiente',NOW(),NULL,9,NULL,NULL),
-(10,10,'Descuento','Solicitud 10','pendiente',NOW(),NULL,10,NULL,NULL),
-(11,11,'Descuento','Solicitud 11','pendiente',NOW(),NULL,11,NULL,NULL),
-(12,12,'Descuento','Solicitud 12','pendiente',NOW(),NULL,12,NULL,NULL),
-(13,13,'Descuento','Solicitud 13','pendiente',NOW(),NULL,13,NULL,NULL),
-(14,14,'Descuento','Solicitud 14','pendiente',NOW(),NULL,14,NULL,NULL),
-(15,15,'Descuento','Solicitud 15','pendiente',NOW(),NULL,15,NULL,NULL),
-(16,16,'Descuento','Solicitud 16','pendiente',NOW(),NULL,16,NULL,NULL),
-(17,17,'Descuento','Solicitud 17','pendiente',NOW(),NULL,17,NULL,NULL),
-(18,18,'Descuento','Solicitud 18','pendiente',NOW(),NULL,18,NULL,NULL),
-(19,19,'Descuento','Solicitud 19','pendiente',NOW(),NULL,19,NULL,NULL),
-(20,20,'Descuento','Solicitud 20','pendiente',NOW(),NULL,20,NULL,NULL);
+(5,1,'Descuento','Solicitud 5','pendiente',NOW(),NULL,1,NULL,NULL),
+(6,2,'Descuento','Solicitud 6','pendiente',NOW(),NULL,2,NULL,NULL),
+(7,3,'Descuento','Solicitud 7','pendiente',NOW(),NULL,3,NULL,NULL),
+(8,4,'Descuento','Solicitud 8','pendiente',NOW(),NULL,4,NULL,NULL),
+(9,1,'Descuento','Solicitud 9','pendiente',NOW(),NULL,1,NULL,NULL),
+(10,2,'Descuento','Solicitud 10','pendiente',NOW(),NULL,2,NULL,NULL),
+(11,3,'Descuento','Solicitud 11','pendiente',NOW(),NULL,3,NULL,NULL),
+(12,4,'Descuento','Solicitud 12','pendiente',NOW(),NULL,4,NULL,NULL),
+(13,1,'Descuento','Solicitud 13','pendiente',NOW(),NULL,1,NULL,NULL),
+(14,2,'Descuento','Solicitud 14','pendiente',NOW(),NULL,2,NULL,NULL),
+(15,3,'Descuento','Solicitud 15','pendiente',NOW(),NULL,3,NULL,NULL),
+(16,4,'Descuento','Solicitud 16','pendiente',NOW(),NULL,4,NULL,NULL),
+(17,1,'Descuento','Solicitud 17','pendiente',NOW(),NULL,1,NULL,NULL),
+(18,2,'Descuento','Solicitud 18','pendiente',NOW(),NULL,2,NULL,NULL),
+(19,3,'Descuento','Solicitud 19','pendiente',NOW(),NULL,3,NULL,NULL),
+(20,4,'Descuento','Solicitud 20','pendiente',NOW(),NULL,4,NULL,NULL);
 
 -- ============================================================
 -- HISTORIAL SOLICITUDES (20)
@@ -1639,22 +1623,22 @@ INSERT INTO beneficiarios (
 (2,2,40,'2025-01-01','2025-12-31',1,2,NOW()),
 (3,3,30,'2025-01-01','2025-12-31',1,3,NOW()),
 (4,4,25,'2025-01-01','2025-12-31',1,4,NOW()),
-(5,5,20,'2025-01-01','2025-12-31',1,5,NOW()),
-(6,6,35,'2025-01-01','2025-12-31',1,6,NOW()),
-(7,7,15,'2025-01-01','2025-12-31',1,7,NOW()),
-(8,8,30,'2025-01-01','2025-12-31',1,8,NOW()),
-(9,9,10,'2025-01-01','2025-12-31',1,9,NOW()),
-(10,10,5,'2025-01-01','2025-12-31',1,10,NOW()),
-(11,11,100,'2025-01-01','2025-12-31',1,11,NOW()),
-(12,12,50,'2025-01-01','2025-12-31',1,12,NOW()),
-(13,13,18,'2025-01-01','2025-12-31',1,13,NOW()),
-(14,14,12,'2025-01-01','2025-12-31',1,14,NOW()),
-(15,15,27,'2025-01-01','2025-12-31',1,15,NOW()),
-(16,16,22,'2025-01-01','2025-12-31',1,16,NOW()),
-(17,17,17,'2025-01-01','2025-12-31',1,17,NOW()),
-(18,18,42,'2025-01-01','2025-12-31',1,18,NOW()),
-(19,19,31,'2025-01-01','2025-12-31',1,19,NOW()),
-(20,20,29,'2025-01-01','2025-12-31',1,20,NOW());
+(5,1,50,'2025-01-01','2025-12-31',1,1,NOW()),
+(6,2,40,'2025-01-01','2025-12-31',1,2,NOW()),
+(7,3,30,'2025-01-01','2025-12-31',1,3,NOW()),
+(8,4,25,'2025-01-01','2025-12-31',1,4,NOW()),
+(9,1,50,'2025-01-01','2025-12-31',1,1,NOW()),
+(10,2,40,'2025-01-01','2025-12-31',1,2,NOW()),
+(11,3,30,'2025-01-01','2025-12-31',1,3,NOW()),
+(12,4,25,'2025-01-01','2025-12-31',1,4,NOW()),
+(13,1,50,'2025-01-01','2025-12-31',1,1,NOW()),
+(14,2,40,'2025-01-01','2025-12-31',1,2,NOW()),
+(15,3,30,'2025-01-01','2025-12-31',1,3,NOW()),
+(16,4,25,'2025-01-01','2025-12-31',1,4,NOW()),
+(17,1,50,'2025-01-01','2025-12-31',1,1,NOW()),
+(18,2,40,'2025-01-01','2025-12-31',1,2,NOW()),
+(19,3,30,'2025-01-01','2025-12-31',1,3,NOW()),
+(20,4,25,'2025-01-01','2025-12-31',1,4,NOW());
 
 -- ============================================================
 -- HISTORIAL DESCUENTOS (20)

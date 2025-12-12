@@ -266,28 +266,51 @@ if (isset($_GET['pagina']) && $_GET['pagina'] === 'admin-tipo-pago') {
     // ELIMINAR
     if (isset($_GET['eliminar'])) {
         try {
-            // Obtener datos antes de eliminar para la notificación
-            $stmtGet = $pdo->prepare("SELECT nombre, descripcion FROM tipo_pago WHERE id = :id LIMIT 1");
-            $stmtGet->execute([":id" => $_GET['eliminar']]);
+            // Validar que el ID sea un número válido
+            $id = filter_var($_GET['eliminar'], FILTER_VALIDATE_INT);
+            if (!$id) {
+                throw new Exception("ID inválido");
+            }
+
+            // Verificar si el tipo de pago existe
+            $stmtGet = $pdo->prepare("SELECT id, nombre, descripcion FROM tipo_pago WHERE id = :id LIMIT 1");
+            $stmtGet->execute([":id" => $id]);
             $tipoPago = $stmtGet->fetch(PDO::FETCH_ASSOC);
+
+            if (!$tipoPago) {
+                throw new Exception("El tipo de pago no existe");
+            }
+
+            // Verificar si hay referencias en otras tablas
+            $stmtCheck = $pdo->prepare("SELECT COUNT(*) as count FROM pagos WHERE tipo_pago = :id");
+            $stmtCheck->execute([":id" => $id]);
+            $referencias = $stmtCheck->fetch(PDO::FETCH_ASSOC)['count'];
+
+            if ($referencias > 0) {
+                throw new Exception("No se puede eliminar este tipo de pago porque está siendo usado en {$referencias} pago(s)");
+            }
 
             // Eliminar
             $stmt = $pdo->prepare("DELETE FROM tipo_pago WHERE id = :id");
-            $stmt->execute([":id" => $_GET['eliminar']]);
+            $result = $stmt->execute([":id" => $id]);
 
-            // Crear notificación si se encontró el registro
-            if ($tipoPago) {
-                NotificacionHelper::crear('eliminar', 'tipo_pago', [
-                    'id' => $_GET['eliminar'],
-                    'nombre' => $tipoPago['nombre'],
-                    'descripcion' => $tipoPago['descripcion'] ?? ''
-                ]);
+            if (!$result) {
+                throw new Exception("No se pudo eliminar el registro");
             }
+
+            // Crear notificación
+            NotificacionHelper::crear('eliminar', 'tipo_pago', [
+                'id' => $id,
+                'nombre' => $tipoPago['nombre'],
+                'descripcion' => $tipoPago['descripcion'] ?? ''
+            ]);
 
             header("Location: dashboard-admin.php?pagina=admin-tipo-pago&msg=eliminado");
             exit;
         } catch (Exception $e) {
-            header("Location: dashboard-admin.php?pagina=admin-tipo-pago&msg=error");
+            // Para debugging: mostrar el error real (comentar en producción)
+            error_log("Error al eliminar tipo de pago: " . $e->getMessage());
+            header("Location: dashboard-admin.php?pagina=admin-tipo-pago&msg=error&detalle=" . urlencode($e->getMessage()));
             exit;
         }
     }

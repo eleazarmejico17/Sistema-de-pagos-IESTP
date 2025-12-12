@@ -1,7 +1,4 @@
 <?php
-require_once __DIR__ . '/../../../config/conexion.php';
-$pdo = Conexion::getInstance()->getConnection();
-
 // --------------------------------------------------
 // NOTIFICACIONES MEJORADAS
 // --------------------------------------------------
@@ -16,6 +13,13 @@ function showMessage($type) {
     if (!isset($messages[$type])) return;
 
     [$text, $color, $icon] = $messages[$type];
+    
+    // Si hay un detalle en el error, mostrarlo
+    $detalle = '';
+    if ($type === 'error' && isset($_GET['detalle'])) {
+        $detalle = htmlspecialchars(urldecode($_GET['detalle']), ENT_QUOTES, 'UTF-8');
+        $text .= ": " . $detalle;
+    }
 
     echo "
         <div class='alert-auto p-4 mb-6 border-l-4 rounded-lg shadow-lg animate-slideDown $color flex items-center gap-3'>
@@ -33,10 +37,10 @@ function showMessage($type) {
 }
 
 // ---------------------------------------------------------------------
-// NOTA: Las acciones (crear, editar, eliminar) se procesan en 
-// dashboard-admin.php ANTES de cualquier output para evitar 
-// errores de "headers already sent"
+// CONEXIÓN Y CONSULTAS (solo después de procesar acciones)
 // ---------------------------------------------------------------------
+require_once __DIR__ . '/../../../config/conexion.php';
+$pdo = Conexion::getInstance()->getConnection();
 
 // ---------------------------------------------------------------------
 // FORMULARIO DE EDICIÓN
@@ -50,12 +54,18 @@ if (isset($_GET['editar'])) {
 }
 
 // ---------------------------------------------------------------------
-// LISTADO
+// CONSULTAS
 // ---------------------------------------------------------------------
-$stmt = $pdo->query("SELECT * FROM tipo_pago ORDER BY id DESC");
-$lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$lista = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM tipo_pago ORDER BY id ASC");
+    $lista = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $lista = [];
+}
 
-// Lista de conceptos que ve el usuario (numerados tipo 1.1, 1.2, etc.)
+// Consulta para conceptos visibles para usuarios (formato numerado 1.1, 1.2, etc.)
+$conceptosUsuario = [];
 try {
     $stmtConceptos = $pdo->query("\n        SELECT id, nombre, descripcion, COALESCE(uit, 0.00) AS uit\n        FROM tipo_pago\n        WHERE nombre REGEXP '^[0-9]+\\.[0-9]+$'\n        ORDER BY CAST(SUBSTRING_INDEX(nombre, '.', 1) AS UNSIGNED) ASC,\n                 CAST(SUBSTRING_INDEX(nombre, '.', -1) AS UNSIGNED) ASC\n    ");
     $conceptosUsuario = $stmtConceptos->fetchAll(PDO::FETCH_ASSOC);
@@ -67,227 +77,178 @@ try {
 
 ?>
 
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-full mx-auto p-6">
 
     <!-- ALERTAS -->
     <?php if (isset($_GET['msg'])) showMessage($_GET['msg']); ?>
 
-    <div class="grid lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.2fr)] gap-6 items-start">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cash-register text-blue-600 text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-semibold text-gray-900">Gestión de Tipos de Pago</h1>
+                <p class="text-gray-600 text-sm">Administre los conceptos y métodos de pago del sistema</p>
+            </div>
+        </div>
+    </div>
 
-      <!-- FORMULARIO MEJORADO (COLUMNA IZQUIERDA) -->
-      <div class="bg-gradient-to-br from-white to-gray-50 p-8 rounded-3xl shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300">
-        <div class="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-            <div class="flex items-center gap-3 flex-1">
-                <div class="p-3 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-lg">
-                    <i class="fas <?= $editData ? 'fa-edit' : 'fa-plus-circle' ?> text-white text-2xl"></i>
+    <!-- LAYOUT HORIZONTAL -->
+    <div class="flex flex-col xl:flex-row gap-6">
+
+      <!-- FORMULARIO (LADO IZQUIERDO) -->
+      <div class="xl:w-1/3">
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <i class="fas <?= $editData ? 'fa-edit' : 'fa-plus' ?> text-blue-600"></i>
                 </div>
                 <div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 tracking-tight">
-                        <?= $editData ? "Editar Tipo de Pago" : "Registrar Tipo de Pago" ?>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        <?= $editData ? "Editar Tipo de Pago" : "Nuevo Tipo de Pago" ?>
                     </h2>
-                    <p class="text-gray-500 text-xs md:text-sm mt-1">
-                        <?= $editData 
-                            ? "Actualiza el nombre, descripción y monto que verán los usuarios al pagar."
-                            : "Configura los conceptos y métodos de pago que estarán disponibles para los usuarios." ?>
+                    <p class="text-gray-500 text-sm">
+                        <?= $editData ? "Actualice los datos del tipo de pago" : "Registre un nuevo concepto o método" ?>
                     </p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span><?= $editData ? "Modo edición" : "Nuevo registro" ?></span>
-                </span>
-                <?php if ($editData): ?>
-                    <a href="dashboard-admin.php?pagina=admin-tipo-pago" 
-                       class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs md:text-sm transition-all flex items-center gap-2 border border-gray-200">
-                        <i class="fas fa-times"></i>
-                        <span>Cancelar</span>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <form method="POST" class="space-y-6">
-            <input type="hidden" name="accion" value="<?= $editData ? "editar" : "crear" ?>">
             <?php if ($editData): ?>
-                <input type="hidden" name="id" value="<?= htmlspecialchars($editData['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p class="text-sm text-amber-800">Modo de edición activo</p>
+                </div>
             <?php endif; ?>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 font-semibold text-gray-700">
-                        <i class="fas fa-tag text-emerald-600"></i>
-                        <span>Nombre del Tipo de Pago <span class="text-red-500">*</span></span>
-                    </label>
-                    <input 
-                        required
-                        type="text"
-                        name="nombre"
-                        value="<?= $editData ? htmlspecialchars($editData['nombre'], ENT_QUOTES, 'UTF-8') : "" ?>"
-                        placeholder="Ej: 1.1, 1.2 o nombre del método (Yape, Efectivo)"
-                        class="w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-700 placeholder-gray-400"
-                    >
-                    <p class="text-[11px] text-gray-400">Para conceptos de pago usa códigos como <span class="font-semibold">1.1, 1.2, 3.1</span>. Para métodos de pago usa un nombre descriptivo.</p>
+        <form method="POST" class="space-y-4">
+                <input type="hidden" name="accion" value="<?= $editData ? "editar" : "crear" ?>">
+                <?php if ($editData): ?>
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($editData['id'], ENT_QUOTES, 'UTF-8'); ?>">
+                <?php endif; ?>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" required
+                           value="<?= htmlspecialchars($editData['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                <div class="space-y-2">
-                    <label class="flex items-center gap-2 font-semibold text-gray-700">
-                        <i class="fas fa-coins text-emerald-600"></i>
-                        <span>UIT / Monto</span>
-                    </label>
-                    <input
-                        type="number"
-                        name="uit"
-                        step="0.01"
-                        min="0"
-                        value="<?= $editData ? htmlspecialchars($editData['uit'] ?? '0.00', ENT_QUOTES, 'UTF-8') : '' ?>"
-                        placeholder="Ej: 18.00"
-                        class="w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-700 placeholder-gray-400"
-                    >
-                    <p class="text-[11px] text-gray-400">Este valor es el que verá el usuario como costo del concepto en la pantalla de pagos.</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Monto (UIT)</label>
+                    <input type="number" name="uit" id="uit" step="0.01" min="0" required
+                           value="<?= htmlspecialchars($editData['uit'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
-            </div>
 
-            <div class="space-y-2">
-                <label class="flex items-center gap-2 font-semibold text-gray-700">
-                    <i class="fas fa-align-left text-emerald-600"></i>
-                    <span>Descripción</span>
-                </label>
-                <textarea 
-                    name="descripcion"
-                    placeholder="Describe brevemente este concepto o método de pago..."
-                    rows="3"
-                    class="w-full px-5 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-gray-700 placeholder-gray-400 resize-none"><?= $editData ? htmlspecialchars($editData['descripcion'], ENT_QUOTES, 'UTF-8') : "" ?></textarea>
-            </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea name="descripcion" id="descripcion" rows="3" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"><?= htmlspecialchars($editData['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
 
-            <button 
-                type="submit"
-                class="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-semibold py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 transform hover:scale-[1.02]">
-                <i class="fas <?= $editData ? 'fa-save' : 'fa-plus-circle' ?> text-lg"></i>
-                <span class="text-sm md:text-base"><?= $editData ? "Guardar Cambios" : "Registrar Tipo de Pago" ?></span>
-            </button>
-        </form>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Visible para usuarios</label>
+                        <select name="visible_usuario" id="visible_usuario" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="1" <?= (isset($editData['visible_usuario']) && $editData['visible_usuario'] == 1) ? 'selected' : '' ?>>Sí</option>
+                            <option value="0" <?= (isset($editData['visible_usuario']) && $editData['visible_usuario'] == 0) ? 'selected' : '' ?>>No</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                        <select name="estado" id="estado" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="1" <?= (isset($editData['estado']) && $editData['estado'] == 1) ? 'selected' : '' ?>>Activo</option>
+                            <option value="0" <?= (isset($editData['estado']) && $editData['estado'] == 0) ? 'selected' : '' ?>>Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                        <?= $editData ? "Actualizar" : "Registrar" ?>
+                    </button>
+                    <?php if ($editData): ?>
+                        <a href="dashboard-admin.php?pagina=admin-tipo-pago"
+                           class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors">
+                            Cancelar
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
       </div>
 
-      <!-- COLUMNA DERECHA: TABLAS -->
-      <div class="space-y-4">
+      <!-- TABLAS (LADO DERECHO - OCUPA MÁS ESPACIO) -->
+      <div class="xl:flex-1 space-y-4">
 
         <!-- Botones tipo pestañas -->
-        <div class="inline-flex bg-gray-100 rounded-full p-1 border border-gray-200">
+        <div class="bg-gray-50 rounded-lg p-1 border border-gray-200 inline-flex">
           <button id="tab-tipos" type="button"
-                  class="tab-btn inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-full bg-white text-blue-600 shadow-sm border border-blue-100">
-            <i class="fas fa-list"></i>
-            <span>Tipos de Pago</span>
+                  class="tab-btn px-4 py-2 text-sm font-medium rounded-md bg-white text-blue-600 border border-gray-300">
+            Tipos de Pago
           </button>
           <button id="tab-conceptos" type="button"
-                  class="tab-btn inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-full text-gray-500 hover:text-blue-600">
-            <i class="fas fa-credit-card"></i>
-            <span>Conceptos (Usuario)</span>
+                  class="tab-btn px-4 py-2 text-sm font-medium rounded-md text-gray-600 hover:text-gray-900">
+            Conceptos (Usuario)
           </button>
         </div>
 
-        <!-- TABLA MEJORADA -->
-        <div id="panel-tipos" class="bg-white p-8 rounded-2xl shadow-xl border border-gray-200">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                    <i class="fas fa-list text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-800">Lista de Tipos de Pago</h2>
-                    <p class="text-gray-500 text-sm mt-1">Gestiona todos los métodos de pago disponibles</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg">
-                <i class="fas fa-calculator text-blue-600"></i>
-                <span class="text-blue-700 font-semibold"><?= count($lista) ?> registros</span>
+        <!-- TABLA -->
+        <div id="panel-tipos" class="bg-white border border-gray-200 rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Tipos de Pago Registrados</h2>
+                <span class="text-sm text-gray-500"><?= count($lista) ?> registros</span>
             </div>
         </div>
 
         <?php if (empty($lista)): ?>
-            <div class="text-center py-12">
-                <div class="inline-block p-6 bg-gray-100 rounded-full mb-4">
-                    <i class="fas fa-inbox text-5xl text-gray-400"></i>
+            <div class="text-center py-8 px-6">
+                <div class="text-gray-400 mb-2">
+                    <i class="fas fa-inbox text-4xl"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay tipos de pago registrados</h3>
-                <p class="text-gray-500">Comienza agregando tu primer método de pago usando el formulario de arriba</p>
+                <p class="text-gray-500">No hay tipos de pago registrados</p>
             </div>
         <?php else: ?>
-            <div class="overflow-x-auto rounded-xl border border-gray-200">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-hashtag text-gray-500"></i>
-                                    <span>ID</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-tag text-gray-500"></i>
-                                    <span>Nombre</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                <div class="flex items-center gap-2">
-                                    <i class="fas fa-align-left text-gray-500"></i>
-                                    <span>Descripción</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                <div class="flex items-center justify-end gap-2">
-                                    <i class="fas fa-coins text-gray-500"></i>
-                                    <span>UIT</span>
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                <div class="flex items-center justify-center gap-2">
-                                    <i class="fas fa-cog text-gray-500"></i>
-                                    <span>Acciones</span>
-                                </div>
-                            </th>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[800px]">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">Nombre</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">UIT</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($lista as $index => $item): ?>
-                            <tr class="hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 <?= $editData && $editData['id'] == $item['id'] ? 'bg-blue-50 border-l-4 border-blue-500' : '' ?>">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 font-bold text-sm">
-                                            <?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>
-                                        </span>
-                                    </div>
+                            <tr class="hover:bg-gray-50 <?= $editData && $editData['id'] == $item['id'] ? 'bg-blue-50' : '' ?>">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                    <?= htmlspecialchars($item['id'], ENT_QUOTES, 'UTF-8') ?>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm font-semibold text-gray-900">
-                                        <?= htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                    </div>
+                                <td class="px-4 py-3 text-sm text-gray-900 font-medium">
+                                    <?= htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8') ?>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-600 max-w-md">
-                                        <?= htmlspecialchars($item['descripcion'] ?: 'Sin descripción', ENT_QUOTES, 'UTF-8') ?>
-                                    </div>
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    <?= htmlspecialchars($item['descripcion'] ?: 'Sin descripción', ENT_QUOTES, 'UTF-8') ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                                        <?= isset($item['uit']) ? number_format((float)$item['uit'], 2, '.', '') : '0.00' ?>
-                                    </span>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right font-medium">
+                                    <?= isset($item['uit']) ? number_format((float)$item['uit'], 2, '.', '') : '0.00' ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="dashboard-admin.php?pagina=admin-tipo-pago&editar=<?= $item['id'] ?>"
-                                           class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                            <i class="fas fa-edit"></i>
-                                            <span>Editar</span>
-                                        </a>
-                                        <a href="dashboard-admin.php?pagina=admin-tipo-pago&eliminar=<?= $item['id'] ?>"
-                                           onclick="return confirmarEliminacion('<?= htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8') ?>')"
-                                           class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                            <i class="fas fa-trash-alt"></i>
-                                            <span>Eliminar</span>
-                                        </a>
-                                    </div>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm">
+                                    <a href="dashboard-admin.php?pagina=admin-tipo-pago&editar=<?= $item['id'] ?>"
+                                       class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
+                                        <i class="fas fa-edit mr-1"></i>Editar
+                                    </a>
+                                    <a href="dashboard-admin.php?pagina=admin-tipo-pago&eliminar=<?= $item['id'] ?>"
+                                       onclick="return confirmarEliminacion('<?= htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8') ?>')"
+                                       class="text-red-600 hover:text-red-900 inline-flex items-center">
+                                        <i class="fas fa-trash mr-1"></i>Eliminar
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -297,66 +258,73 @@ try {
         <?php endif; ?>
         </div>
 
-        <!-- VISTA COMO USUARIO (CONCEPTOS DISPONIBLES) -->
-        <div id="panel-conceptos" class="bg-white p-8 rounded-2xl shadow-xl border border-gray-200 hidden">
-        <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center gap-3">
-                <div class="p-3 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl shadow-lg">
-                    <i class="fas fa-credit-card text-white text-2xl"></i>
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Vista de Conceptos (como usuario)</h2>
-                    <p class="text-gray-500 text-sm mt-1">Así se muestran los conceptos de pago en el módulo de PAGOS del usuario.</p>
-                </div>
-            </div>
-            <div class="text-xs px-4 py-2 bg-blue-50 text-blue-700 rounded-full font-semibold border border-blue-100">
-                <?= count($conceptosUsuario) ?> conceptos
+        <!-- VISTA DE CONCEPTOS DE PAGO (COMO LO VE EL USUARIO) -->
+        <div id="panel-conceptos" class="bg-white border border-gray-200 rounded-lg hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Conceptos de Pago (Vista Usuario)</h2>
+                <span class="text-sm text-gray-500"><?= count($lista) ?> conceptos disponibles</span>
             </div>
         </div>
 
-        <?php if (empty($conceptosUsuario)): ?>
-            <div class="text-center py-10 text-gray-500 text-sm">
-                No hay conceptos numerados (1.1, 1.2, etc.) registrados todavía.
+        <?php if (empty($lista)): ?>
+            <div class="text-center py-8 px-6">
+                <div class="text-gray-400 mb-2">
+                    <i class="fas fa-inbox text-4xl"></i>
+                </div>
+                <p class="text-gray-500">No hay conceptos de pago disponibles</p>
             </div>
         <?php else: ?>
-            <div class="overflow-x-auto rounded-xl border border-gray-200">
-                <table class="min-w-full bg-white border-collapse">
-                    <thead>
-                        <tr class="bg-gray-100 border-b border-gray-200">
-                            <th class="py-3 px-4 border-r border-gray-200 text-left text-xs font-semibold text-gray-600">N°</th>
-                            <th class="py-3 px-4 border-r border-gray-200 text-left text-xs font-semibold text-gray-600">CONCEPTO</th>
-                            <th class="py-3 px-4 border-r border-gray-200 text-right text-xs font-semibold text-gray-600">UIT</th>
-                            <th class="py-3 px-4 text-center text-xs font-semibold text-gray-600">ACCIONES</th>
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[800px]">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">ID</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">UIT</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($conceptosUsuario as $item): 
-                            $numero = htmlspecialchars($item['nombre'], ENT_QUOTES, 'UTF-8');
-                            $concepto = htmlspecialchars($item['descripcion'], ENT_QUOTES, 'UTF-8');
-                            $uit = isset($item['uit']) ? number_format((float)$item['uit'], 2, '.', '') : number_format(0.00, 2, '.', '');
-                            $idConcepto = (int)$item['id'];
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($lista as $index => $item): 
+                            $id = (int)$item['id'];
+                            $descripcion = htmlspecialchars($item['descripcion'], ENT_QUOTES, 'UTF-8');
+                            $uit = isset($item['uit']) && $item['uit'] > 0 ? number_format((float)$item['uit'], 2, '.', '') : number_format(0.00, 2, '.', '');
                         ?>
-                            <tr class="hover:bg-gray-50 border-t border-gray-100">
-                                <td class="py-3 px-4 text-gray-700 border-r border-gray-100 align-middle">
-                                    <?= $numero ?>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                    <?= $id ?>
                                 </td>
-                                <td class="py-3 px-4 text-gray-700 border-r border-gray-100 align-middle">
-                                    <?= $concepto ?>
+                                <td class="px-4 py-3 text-sm text-gray-900">
+                                    <?= $descripcion ?>
                                 </td>
-                                <td class="py-3 px-4 text-gray-700 text-right font-medium border-r border-gray-100 align-middle">
-                                    <?= $uit ?>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 font-medium">
+                                    S/ <?= $uit ?>
                                 </td>
-                                <td class="py-3 px-4 text-center align-middle">
-                                    <a href="dashboard-admin.php?pagina=admin-tipo-pago&editar=<?= $idConcepto ?>"
-                                       class="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg shadow-sm">
-                                        <i class="fas fa-pen"></i>
-                                        <span>Editar</span>
-                                    </a>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm">
+                                    <a href="dashboard-admin.php?pagina=admin-tipo-pago&editar=<?= $id ?>"
+                                       class="text-blue-600 hover:text-blue-900 mr-3">Editar</a>
+                                    <a href="dashboard-admin.php?pagina=admin-tipo-pago&eliminar=<?= $id ?>"
+                                       onclick="return confirmarEliminacion('<?= htmlspecialchars($item['descripcion'], ENT_QUOTES, 'UTF-8') ?>')"
+                                       class="text-red-600 hover:text-red-900">Eliminar</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Esta vista muestra los conceptos de pago disponibles para los estudiantes, tal como los ven ellos en el sistema.
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        Total conceptos: <?= count($lista) ?>
+                    </div>
+                </div>
             </div>
         <?php endif; ?>
         </div>
@@ -385,7 +353,7 @@ function confirmarEliminacion(nombre) {
 // Scroll suave al formulario cuando se está editando
 <?php if ($editData): ?>
 document.addEventListener('DOMContentLoaded', function() {
-    const formCard = document.querySelector('.bg-gradient-to-br.from-white');
+    const formCard = document.querySelector('.bg-white');
     if (formCard) {
         setTimeout(() => {
             formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -410,13 +378,13 @@ document.addEventListener('DOMContentLoaded', function() {
         panelConceptos.classList.toggle('hidden', esTipos);
 
         if (esTipos) {
-            tabTipos.classList.add('bg-white','text-blue-600','shadow-sm','border','border-blue-100');
-            tabConceptos.classList.remove('bg-white','text-blue-600','shadow-sm','border','border-blue-100');
-            tabConceptos.classList.add('text-gray-500');
+            tabTipos.classList.add('bg-white','text-blue-600','border','border-gray-300');
+            tabConceptos.classList.remove('bg-white','text-blue-600','border','border-gray-300');
+            tabConceptos.classList.add('text-gray-600');
         } else {
-            tabConceptos.classList.add('bg-white','text-blue-600','shadow-sm','border','border-blue-100');
-            tabTipos.classList.remove('bg-white','text-blue-600','shadow-sm','border','border-blue-100');
-            tabTipos.classList.add('text-gray-500');
+            tabConceptos.classList.add('bg-white','text-blue-600','border','border-gray-300');
+            tabTipos.classList.remove('bg-white','text-blue-600','border','border-gray-300');
+            tabTipos.classList.add('text-gray-600');
         }
     }
 
