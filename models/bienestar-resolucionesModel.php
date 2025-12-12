@@ -94,6 +94,7 @@ class ResolucionModel {
                 e.apnom_emp AS creado_por_nombre
             FROM resoluciones r
             LEFT JOIN empleado e ON e.id = r.creado_por
+            WHERE r.estado = true
             ORDER BY r.creado_en DESC
         ");
         $sql->execute();

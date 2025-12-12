@@ -26,12 +26,13 @@ try {
     // ✅ CONEXIÓN CORRECTA
     $db = Conexion::getInstance()->getConnection();
 
-    // VALIDAMOS ID en tabla 'solicitudes'
-    $check = $db->prepare("SELECT id FROM solicitudes WHERE id = :id");
+    // VALIDAMOS ID en tabla 'resoluciones' (nuevo sistema)
+    $check = $db->prepare("SELECT id, creado_por FROM resoluciones WHERE id = :id");
     $check->execute([':id' => $id]);
     if ($check->rowCount() === 0) {
-        throw new Exception("Solicitud no encontrada");
+        throw new Exception("Resolución no encontrada");
     }
+    $resolucionData = $check->fetch(PDO::FETCH_ASSOC);
 
     // BUSCAR EMPLEADO SEGÚN SESIÓN
     $empleadoId = null;
@@ -67,72 +68,16 @@ try {
         $params[':empleado_id'] = $empleadoId;
     }
 
-    // ACTUALIZAR en tabla 'solicitudes'
-    $sql = "UPDATE solicitudes SET " . implode(', ', $set) . " WHERE id = :id";
-    $stmt = $db->prepare($sql);
-    $stmt->execute($params);
-
-    // SI ESTADO ES APROBADO, CREAR BENEFICIARIO AUTOMÁTICAMENTE
+    // ACTUALIZAR en tabla 'resoluciones' (nuevo sistema)
     if ($estado === 'Aprobado' || $estado === 'aprobado' || $estado === 'APROBADO') {
-        try {
-            // Obtener datos de la solicitud y resolución
-            $stmtSol = $db->prepare("
-                SELECT s.estudiante, s.resoluciones, r.monto_descuento, r.numero_resolucion
-                FROM solicitudes s
-                LEFT JOIN resoluciones r ON s.resoluciones = r.id
-                WHERE s.id = :id
-            ");
-            $stmtSol->execute([':id' => $id]);
-            $solicitudData = $stmtSol->fetch(PDO::FETCH_ASSOC);
-            
-            if ($solicitudData && $solicitudData['estudiante'] && $solicitudData['resoluciones']) {
-                // Verificar si ya existe un beneficiario para esta combinación
-                $checkBenef = $db->prepare("
-                    SELECT id FROM beneficiarios 
-                    WHERE estudiante = :estudiante AND resoluciones = :resoluciones
-                ");
-                $checkBenef->execute([
-                    ':estudiante' => $solicitudData['estudiante'],
-                    ':resoluciones' => $solicitudData['resoluciones']
-                ]);
-                
-                if ($checkBenef->rowCount() === 0) {
-                    // Crear nuevo beneficiario
-                    $porcentajeDescuento = $solicitudData['monto_descuento'] ?? 0;
-                    
-                    $insertBenef = $db->prepare("
-                        INSERT INTO beneficiarios 
-                        (estudiante, resoluciones, porcentaje_descuento, fecha_inicio, activo, registrado_por, registrado_en)
-                        VALUES (:estudiante, :resoluciones, :porcentaje, CURDATE(), 1, :empleado, NOW())
-                    ");
-                    $insertBenef->execute([
-                        ':estudiante' => $solicitudData['estudiante'],
-                        ':resoluciones' => $solicitudData['resoluciones'],
-                        ':porcentaje' => $porcentajeDescuento,
-                        ':empleado' => $empleadoId
-                    ]);
-                    
-                    // Agregar al historial de descuentos
-                    $beneficiarioId = $db->lastInsertId();
-                    $insertHistorial = $db->prepare("
-                        INSERT INTO historial_descuentos 
-                        (beneficiario_id, monto_original, porcentaje_descuento, monto_descuento, monto_final, aplicado_por, aplicado_en, observaciones)
-                        VALUES (:benef, 0, :porcentaje, 0, 0, :empleado, NOW(), :observacion)
-                    ");
-                    $insertHistorial->execute([
-                        ':benef' => $beneficiarioId,
-                        ':porcentaje' => $porcentajeDescuento,
-                        ':empleado' => $empleadoId,
-                        ':observacion' => 'Descuento aplicado automáticamente por aprobación de solicitud ' . $solicitudData['numero_resolucion']
-                    ]);
-                }
-            }
-        } catch (Exception $e) {
-            error_log("Error creando beneficiario: " . $e->getMessage());
-            // No fallar el proceso principal si hay error en la creación del beneficiario
-        }
+        $sql = "UPDATE resoluciones SET estado = true WHERE id = :id";
+    } else {
+        $sql = "UPDATE resoluciones SET estado = false WHERE id = :id";
     }
+    $stmt = $db->prepare($sql);
+    $stmt->execute([':id' => $id]);
 
+    
     // INSERTAR HISTORIAL SI EXISTE EMPLEADO
     if ($empleadoId !== null) {
         $historial = $db->prepare("
@@ -148,7 +93,91 @@ try {
         ]);
     }
 
-    // Nota: se omite lógica de notificaciones por correo/tabla 'notificaciones'
+    // CREAR NOTIFICACIÓN PARA BIENESTAR CON DATOS DE RESOLUCIÓN
+    try {
+        // Obtener información completa de la resolución para la notificación
+        $stmtNotif = $db->prepare("
+            SELECT r.id, r.numero_resolucion, r.titulo, r.texto_respaldo, 
+                   r.monto_descuento, r.fecha_inicio, r.fecha_fin, r.creado_en,
+                   r.ruta_documento, r.creado_por,
+                   emp.apnom_emp AS creador_nombre, emp.mailp_emp AS creador_correo
+            FROM resoluciones r
+            LEFT JOIN empleado emp ON emp.id = r.creado_por
+            WHERE r.id = :id
+        ");
+        $stmtNotif->execute([':id' => $id]);
+        $notifData = $stmtNotif->fetch(PDO::FETCH_ASSOC);
+        
+        if ($notifData) {
+            // Construir mensaje con datos específicos de la resolución
+            $mensajeNotificacion = "Resolución N° " . ($notifData['numero_resolucion'] ?: 'N/A') . "\n";
+            $mensajeNotificacion .= "Título: " . ($notifData['titulo'] ?: 'Sin título') . "\n";
+            $mensajeNotificacion .= "Creador: " . ($notifData['creador_nombre'] ?: 'No especificado') . "\n";
+            
+            if ($notifData['monto_descuento'] && $notifData['monto_descuento'] > 0) {
+                $mensajeNotificacion .= "Descuento: S/ " . number_format($notifData['monto_descuento'], 2) . "\n";
+            }
+            
+            if ($notifData['fecha_inicio'] && $notifData['fecha_fin']) {
+                $mensajeNotificacion .= "Vigencia: " . date('d/m/Y', strtotime($notifData['fecha_inicio'])) . 
+                                       " al " . date('d/m/Y', strtotime($notifData['fecha_fin'])) . "\n";
+            }
+            
+            if ($estado === 'Rechazado' && $motivo) {
+                $mensajeNotificacion .= "Motivo de rechazo: " . $motivo;
+            } else {
+                $mensajeNotificacion .= "Estado: " . $estado . " por Dirección";
+            }
+            
+            // Insertar en historial_solicitudes con información detallada
+            $historialNotif = $db->prepare("
+                INSERT INTO historial_solicitudes 
+                (solicitud_id, estado, empleado_id, comentarios, fecha_registro)
+                VALUES (:sid, :estado, :emp, :coment, NOW())
+            ");
+            $historialNotif->execute([
+                ':sid'   => $id,
+                ':estado'=> $estado,
+                ':emp'   => $empleadoId,
+                ':coment'=> $mensajeNotificacion
+            ]);
+            
+            // Crear notificación específica para bienestar
+            $notifBienestar = $db->prepare("
+                INSERT INTO notificaciones_bienestar 
+                (tipo, titulo, mensaje, id_resolucion, id_empleado_creador, estado_notificacion, creado_en)
+                VALUES (:tipo, :titulo, :mensaje, :id_res, :id_emp, 'no_leida', NOW())
+            ");
+            
+            $tipoNotif = ($estado === 'Aprobado' || $estado === 'aprobado' || $estado === 'APROBADO') ? 'aprobacion' : 'rechazo';
+            $tituloNotif = "Resolución " . (($estado === 'Aprobado' || $estado === 'aprobado' || $estado === 'APROBADO') ? 'Aprobada' : 'Rechazada');
+            $mensajeCorto = "La resolución N° " . ($notifData['numero_resolucion'] ?: 'N/A') . 
+                           " ha sido " . (($estado === 'Aprobado' || $estado === 'aprobado' || $estado === 'APROBADO') ? 'aprobada' : 'rechazada') . 
+                           " por Dirección.";
+            
+            // DEBUG: Verificar datos antes de insertar
+            error_log("=== DEBUG CREANDO NOTIFICACIÓN ===");
+            error_log("Tipo: " . $tipoNotif);
+            error_log("Título: " . $tituloNotif);
+            error_log("Mensaje: " . $mensajeCorto);
+            error_log("ID Resolución: " . $id);
+            error_log("ID Empleado Creador: " . $notifData['creado_por']);
+            
+            $result = $notifBienestar->execute([
+                ':tipo' => $tipoNotif,
+                ':titulo' => $tituloNotif,
+                ':mensaje' => $mensajeCorto,
+                ':id_res' => $id,
+                ':id_emp' => $notifData['creado_por']
+            ]);
+            
+            error_log("Resultado de inserción: " . ($result ? 'EXITOSO' : 'FALLIDO'));
+            error_log("ID de última inserción: " . $db->lastInsertId());
+        }
+    } catch (Exception $e) {
+        error_log("Error creando notificación: " . $e->getMessage());
+        // No fallar el proceso principal si hay error en la notificación
+    }
 
     echo json_encode([
         "success" => true,

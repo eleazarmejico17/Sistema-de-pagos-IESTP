@@ -107,6 +107,7 @@ create database db_sistema;
 		ruta_documento varchar(255),
 		fecha_inicio date,
 		fecha_fin date,
+		estado boolean default false,
 		creado_por int,
 		creado_en datetime,
 		foreign key (creado_por) references empleado(id)

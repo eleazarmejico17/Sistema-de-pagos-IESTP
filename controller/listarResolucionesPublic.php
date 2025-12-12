@@ -6,7 +6,7 @@ require_once __DIR__ . '/../config/conexion.php';
 try {
     $db = Conexion::getInstance()->getConnection();
 
-    $stmt = $db->prepare("SELECT id, numero_resolucion, titulo FROM resoluciones ORDER BY creado_en DESC");
+    $stmt = $db->prepare("SELECT id, numero_resolucion, titulo FROM resoluciones WHERE estado = true ORDER BY creado_en DESC");
     $stmt->execute();
     $resoluciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
