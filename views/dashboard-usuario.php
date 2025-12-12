@@ -9,8 +9,7 @@ $menu = [
   'usuario-solicitud'   => ['icon' => 'fa-plus', 'texto' => 'NUEVO'],
   'notificaciones'      => ['icon' => 'fa-bell', 'texto' => 'NOTIFICACIONES'],
   'pagos'               => ['icon' => 'fa-file-invoice', 'texto' => 'PAGOS'],
-  'comprobantes'        => ['icon' => 'fa-folder', 'texto' => 'COMPROBANTES'],
-  'beneficiarios'       => ['icon' => 'fa-users', 'texto' => 'BENEFICIARIOS']
+  'comprobantes'        => ['icon' => 'fa-folder', 'texto' => 'COMPROBANTES']
 ];
 
 // CORREGIDO → priorizar PHP, luego HTML
